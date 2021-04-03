@@ -1,0 +1,7 @@
+{
+ "wifiSSID":       "WiFi-SSID",
+ "wifiPassphrase": "WiFi-Secret",
+ "mqttServer":     "mqtt.at.home",
+ "firmwareURL":    "http://192.168.0.1/firmware/esp8266-intexsbh20.bin",
+ "errorLanguage":  "EN"
+}
