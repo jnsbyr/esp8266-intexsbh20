@@ -111,11 +111,31 @@ and tap the cable from the control panel to the main board.
   I do not provide any warranty and I will not assume any responsibility for any
   damage you cause yourself or others by using this project.
 
+### PCB
+
+You could design your own PCB but the circuit is rather simple and a perfboard
+will do.
+
+![Perfboard](assets/Perfboard.jpg "perfboard with sandwich connectors for ESP8266 board")
+
+It is not essential to use the D1 mini, it just makes uploading the firmware and
+the config file easier because you don't need an extra USB adapter and a 5 V DC
+converter is also included. Any other ESP8266 board with enough ports on the
+breakout will do (e.g. ESP12, HUZZAH) but may require slight adjustments to the
+circuit.
+
+Before you make a final decision about the board type read the chapter about
+the [thermometer](#wifi-controller-thermometer) below.
+
 ### Case and Cables
 
-Select a case that is IP67 or better to protect the circuit from moisture
+Select a case that is IP64 or better to protect the circuit from moisture
 and to protect the pool users from electrical shock. The same applies to the
-cables and plugs.
+cables and plugs. For my solution these components were the most expensive 
+part of the project at around 30 EUR.
+
+![CableTree](assets/CableTree.jpg "modified cable tree of Intex SB-H20 control panel")
+
 
 ### Power Supply
 
@@ -138,20 +158,6 @@ may overtax or damage the mainboard. With a consumption of 20 mA the probability
 is rather low because a single segment of a 7-segment display alone will consume
 a few mA and not all segments are on all the time but the power supply of the
 SB-H20 should have the reserve for this case.
-
-### PCB
-
-You could design your own PCB but the circuit is rather simple and a perfboard
-will do.
-
-It is not essential to use the D1 mini, it just makes uploading the firmware and
-the config file easier because you don't need an extra USB adapter and a 5 V DC
-converter is also included. Any other ESP8266 board with enough ports on the
-breakout will do (e.g. ESP12, HUZZAH) but may require slight adjustments to the
-circuit.
-
-Before you make a final decision about the board type read the chapter about
-the [thermometer](#wifi-controller-thermometer) below.
 
 ### Firmware
 
