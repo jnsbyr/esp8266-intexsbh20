@@ -113,13 +113,18 @@ and tap the cable from the control panel to the main board.
 
 ### PCB
 
-You could design your own PCB but the circuit is rather simple and a perfboard
-will do.
+Depending on your preferences you have several options available regarding the PCB:
 
-![Perfboard](assets/Perfboard.jpg "perfboard with sandwich connectors for ESP8266 board")
+- use a perfboard (the ciruit is rather simple)
+- use the PCB design from @Elektroarzt
+- create you own customized PCB
 
-It is not essential to use the D1 mini, it just makes uploading the firmware and
-the config file easier because you don't need an extra USB adapter and a 5 V DC
+![Perfboard](assets/Perfboard.jpg "compact perfboard with sandwich connectors")
+
+![PCB](pcb/PCB.jpeg "PCB with screw terminal")
+
+It is not even essential to use the D1 mini, it just makes uploading the firmware
+and the config file easier because you don't need an extra USB adapter and a 5 V DC
 converter is also included. Any other ESP8266 board with enough ports on the
 breakout will do (e.g. ESP12, HUZZAH) but may require slight adjustments to the
 circuit.
@@ -376,5 +381,11 @@ The concept of this project and parts of the firmware are based on:
 #### DIYSCIP
 
 Copyright (C) 2020 [Geoffroy Hubert](https://github.com/yorffoeg/diyscip)
+
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+#### PCB
+
+Copyright (C) 2022 [Elektroarzt](https://github.com/Elektroarzt)
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
