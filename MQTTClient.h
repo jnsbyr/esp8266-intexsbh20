@@ -47,7 +47,7 @@ public:
   void addSubscriber(const char* topic, void (*setter)(bool value));
   void addSubscriber(const char* topic, void (*setter)(int value));
 
-  void setup(const char* mqttServer, const char* clientId, const char* willTopic, const char* willMessage);
+  void setup(const char* mqttServer, const char* mqttUsername, const char* mqttPassword,const char* clientId, const char* willTopic, const char* willMessage);
   void loop();
 
   bool isConnected();
@@ -69,6 +69,8 @@ private:
   const char* clientId;
   const char* willTopic;
   const char* willMessage;
+  const char* mqttuser;
+  const char* mqttpw;
 
 private:
   std::map<String, String> metadata;

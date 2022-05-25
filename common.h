@@ -56,6 +56,8 @@ namespace CONFIG_TAG
   const char WIFI_OTA_URL[]    = "firmwareURL";
 
   const char MQTT_SERVER[]     = "mqttServer";
+  const char MQTT_USER[]     = "mqttUser";
+  const char MQTT_PASSWORD[]     = "mqttPassword";
   const char MQTT_ERROR_LANG[] = "errorLanguage";
 };
 
@@ -135,4 +137,3 @@ static unsigned long diff(unsigned int newVal, unsigned int oldVal)
 }
 
 #endif /* COMMON_H */
-
