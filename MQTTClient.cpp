@@ -97,7 +97,7 @@ void MQTTClient::reconnect()
       {
         for (auto m: metadata)
         {
-          mqttClient.publish(m.first.c_str(), m.second.c_str());
+          mqttClient.publish(m.first.c_str(), m.second.c_str(), true);
         }
       }
 
@@ -177,7 +177,7 @@ bool MQTTClient::publish(const char* topic, const String& message, bool force)
     // publish on change
     if (mqttClient.connected() && (changed || force))
     {
-      bool published = mqttClient.publish(topic, message.c_str());
+      bool published = mqttClient.publish(topic, message.c_str(), true);
       if (published && changed)
       {
         publications[topic] = message;
