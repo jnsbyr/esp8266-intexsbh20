@@ -69,8 +69,10 @@ void MQTTClient::subscriptionUpdate(char* topic, byte* message, unsigned int len
   publications.erase(willTopic);
 }
 
-void MQTTClient::setup(const char* mqttServer, const char* cid, const char* wt, const char* wm)
+void MQTTClient::setup(const char* mqttServer,const char* mqttUsername, const char* mqttPassword, const char* cid, const char* wt, const char* wm)
 {
+  mqttuser = mqttUsername;
+  mqttpw = mqttPassword;
   clientId = cid;
   willTopic = wt;
   willMessage = wm;
@@ -85,7 +87,7 @@ void MQTTClient::reconnect()
   {
     // not connected, try to reconnect
     Serial.print("trying to connect to MQTT server ... ");
-    if (mqttClient.connect(clientId, willTopic, MQTTQOS0, true, willMessage))
+    if (mqttClient.connect(clientId, mqttuser, mqttpw, willTopic, MQTTQOS0, true, willMessage))
     {
       // connected
       Serial.println("success");
@@ -95,7 +97,7 @@ void MQTTClient::reconnect()
       {
         for (auto m: metadata)
         {
-          mqttClient.publish(m.first.c_str(), m.second.c_str());
+          mqttClient.publish(m.first.c_str(), m.second.c_str(), true);
         }
       }
 
@@ -175,7 +177,7 @@ bool MQTTClient::publish(const char* topic, const String& message, bool force)
     // publish on change
     if (mqttClient.connected() && (changed || force))
     {
-      bool published = mqttClient.publish(topic, message.c_str());
+      bool published = mqttClient.publish(topic, message.c_str(), true);
       if (published && changed)
       {
         publications[topic] = message;

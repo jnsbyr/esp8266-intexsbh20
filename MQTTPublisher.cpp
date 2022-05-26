@@ -43,7 +43,7 @@ void MQTTPublisher::publishIfDefined(const char* topic, uint8 b, uint8 undef)
 {
   if (b != undef)
   {
-    mqttClient.publish(topic, b? "on" : "off");
+    mqttClient.publish(topic, b? "on" : "off", true);
   }
 }
 
@@ -66,13 +66,13 @@ void MQTTPublisher::publishIfDefined(const char* topic, uint16 u, uint16 undef)
 void MQTTPublisher::publish(const char* topic, int i)
 {
   snprintf(buf, BUFFER_SIZE, "%d", i);
-  mqttClient.publish(topic, buf);
+  mqttClient.publish(topic, buf, true);
 }
 
 void MQTTPublisher::publish(const char* topic, unsigned int u)
 {
   snprintf(buf, BUFFER_SIZE, "%u", u);
-  mqttClient.publish(topic, buf);
+  mqttClient.publish(topic, buf, true);
 }
 
 void MQTTPublisher::publishTemp(const char* topic, float t)
@@ -81,12 +81,12 @@ void MQTTPublisher::publishTemp(const char* topic, float t)
   if (t >= -60 && t <= 145)
   {
     DEBUG_MSG("controller temperature: %s °C\n", buf);
-    mqttClient.publish(topic, buf);
+    mqttClient.publish(topic, buf, true);
   }
   else
   {
     DEBUG_MSG("controller temperature: error (%s °C)\n", buf);
-    mqttClient.publish(topic, "error");
+    mqttClient.publish(topic, "error", true);
   }
 }
 
@@ -101,7 +101,7 @@ void MQTTPublisher::loop()
   {
     poolUpdateTime = now;
 
-    bool forcedStateUpdate = false;
+    bool forcedStateUpdate = true;
     if (timeDiff(now, poolStateUpdateTime) >= CONFIG::FORCED_STATE_UPDATE_PERIOD)
     {
       poolStateUpdateTime = now;
@@ -117,7 +117,7 @@ void MQTTPublisher::loop()
       bool b = poolIO.isHeaterOn();
       if (b != SBH20IO::UNDEF::BOOL)
       {
-        mqttClient.publish(MQTT_TOPIC::HEATER, b? (poolIO.isHeaterStandby()? "standby" : "on") : "off");
+        mqttClient.publish(MQTT_TOPIC::HEATER, b? (poolIO.isHeaterStandby()? "standby" : "on") : "off", true);
       }
 
       publishIfDefined(MQTT_TOPIC::WATER_ACT, poolIO.getActWaterTempCelsius(),     (int)SBH20IO::UNDEF::USHORT);
@@ -136,7 +136,7 @@ void MQTTPublisher::loop()
       {
         mqttClient.publish(MQTT_TOPIC::STATE, "error", forcedStateUpdate);
       }
-      mqttClient.publish(MQTT_TOPIC::ERROR, poolIO.getErrorMessage(errorVal).c_str());
+      mqttClient.publish(MQTT_TOPIC::ERROR, poolIO.getErrorMessage(errorVal).c_str(), true);
     }
     else
     {
