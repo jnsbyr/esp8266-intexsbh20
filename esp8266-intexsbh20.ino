@@ -112,7 +112,7 @@ void setup()
         String lang = config.get(CONFIG_TAG::MQTT_ERROR_LANG);
         language = lang == "EN"? LANG::EN : (lang == "DE"? LANG::DE : LANG::CODE);
       }
-      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
+      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
