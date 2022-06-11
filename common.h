@@ -35,7 +35,7 @@
 namespace CONFIG
 {
   const char POOL_MODEL_NAME[] = "Intex PureSpa SB-H20";
-  const char WIFI_VERSION[]    = "1.0.0.0"; // 01.04.2021
+  const char WIFI_VERSION[]    = "1.0.1.1"; // 21.06.2022
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot
@@ -56,8 +56,8 @@ namespace CONFIG_TAG
   const char WIFI_OTA_URL[]    = "firmwareURL";
 
   const char MQTT_SERVER[]     = "mqttServer";
-  const char MQTT_USER[]     = "mqttUser";
-  const char MQTT_PASSWORD[]     = "mqttPassword";
+  const char MQTT_USER[]       = "mqttUser";
+  const char MQTT_PASSWORD[]   = "mqttPassword";
   const char MQTT_ERROR_LANG[] = "errorLanguage";
 };
 

@@ -185,13 +185,15 @@ Example:
  "wifiSSID":       "WiFi-SSID",
  "wifiPassphrase": "WiFi-secret",
  "mqttServer":     "mqtt.at.home",
+ "mqttUser":       "leave blank if you don't need authentication",
+ "mqttPassword":   "leave blank if you don't need authentication",
  "firmwareURL":    "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
  "errorLanguage":  "EN"
 }
 ```
 
-If *firmwareURL* is undefined OTA updates are disabled. For *errorLanguage* you can
-choose between "EN" and "DE". If *errorLanguage* is undefined, the control panel
+If *firmwareURL* is omitted OTA updates are disabled. For *errorLanguage* you can
+choose between "EN" and "DE". If *errorLanguage* is omitted, the control panel
 error code will be used.
 
 If you get a parsing error in the serial monitor when starting the MCU look closely
