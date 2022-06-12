@@ -40,6 +40,10 @@ public:
   MQTTPublisher(MQTTClient& mqttClient, SBH20IO& poolIO, NTCThermometer& thermometer);
 
 public:
+  void setRetainAll(bool retain);
+  bool isRetainAll() const;
+  
+public:
   void loop();
 
 private:
@@ -59,6 +63,7 @@ private:
   MQTTClient& mqttClient;
   SBH20IO& poolIO;
   NTCThermometer& thermometer;
+  bool retainAll;
 
 private:
   unsigned long poolUpdateTime = 0;

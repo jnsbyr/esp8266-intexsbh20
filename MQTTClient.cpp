@@ -155,10 +155,11 @@ bool MQTTClient::isConnected()
  *
  * @param topic
  * @param payload
+ * @param retain
  * @param force
  * @return true if published
  */
-bool MQTTClient::publish(const char* topic, const String& message, bool force)
+bool MQTTClient::publish(const char* topic, const String& message, bool retain, bool force)
 {
   if (lastConnectTime)
   {
@@ -177,7 +178,7 @@ bool MQTTClient::publish(const char* topic, const String& message, bool force)
     // publish on change
     if (mqttClient.connected() && (changed || force))
     {
-      bool published = mqttClient.publish(topic, message.c_str(), true);
+      bool published = mqttClient.publish(topic, message.c_str(), retain);
       if (published && changed)
       {
         publications[topic] = message;

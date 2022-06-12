@@ -93,7 +93,10 @@ void setup()
       WiFi.mode(WIFI_STA);
       WiFi.begin(config.get(CONFIG_TAG::WIFI_SSID), config.get(CONFIG_TAG::WIFI_PASSPHRASE));
 
-      // init MQTT client
+      // init MQTT
+      bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN)? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
+      mqttPublisher.setRetainAll(retainAll);
+      
       mqttClient.addMetadata(MQTT_TOPIC::MODEL, CONFIG::POOL_MODEL_NAME);
       mqttClient.addMetadata(MQTT_TOPIC::VERSION, CONFIG::WIFI_VERSION);
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void { poolIO.setBubbleOn(b); });

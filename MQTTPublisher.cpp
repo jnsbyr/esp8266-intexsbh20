@@ -35,15 +35,29 @@
 MQTTPublisher::MQTTPublisher(MQTTClient& mqttClient, SBH20IO& poolIO, NTCThermometer& thermometer) :
   mqttClient(mqttClient),
   poolIO(poolIO),
-  thermometer(thermometer)
+  thermometer(thermometer),
+  retainAll(false)
 {
+}
+
+/**
+ * set retain flag in all published MQTT messages
+ */
+void MQTTPublisher::setRetainAll(bool retain)
+{
+  retainAll = retain;
+}
+
+bool MQTTPublisher::isRetainAll() const
+{
+  return retainAll;
 }
 
 void MQTTPublisher::publishIfDefined(const char* topic, uint8 b, uint8 undef)
 {
   if (b != undef)
   {
-    mqttClient.publish(topic, b? "on" : "off", true);
+    mqttClient.publish(topic, b? "on" : "off", retainAll);
   }
 }
 
@@ -66,13 +80,13 @@ void MQTTPublisher::publishIfDefined(const char* topic, uint16 u, uint16 undef)
 void MQTTPublisher::publish(const char* topic, int i)
 {
   snprintf(buf, BUFFER_SIZE, "%d", i);
-  mqttClient.publish(topic, buf, true);
+  mqttClient.publish(topic, buf, retainAll);
 }
 
 void MQTTPublisher::publish(const char* topic, unsigned int u)
 {
   snprintf(buf, BUFFER_SIZE, "%u", u);
-  mqttClient.publish(topic, buf, true);
+  mqttClient.publish(topic, buf, retainAll);
 }
 
 void MQTTPublisher::publishTemp(const char* topic, float t)
@@ -81,12 +95,12 @@ void MQTTPublisher::publishTemp(const char* topic, float t)
   if (t >= -60 && t <= 145)
   {
     DEBUG_MSG("controller temperature: %s °C\n", buf);
-    mqttClient.publish(topic, buf, true);
+    mqttClient.publish(topic, buf, retainAll);
   }
   else
   {
     DEBUG_MSG("controller temperature: error (%s °C)\n", buf);
-    mqttClient.publish(topic, "error", true);
+    mqttClient.publish(topic, "error", retainAll);
   }
 }
 
@@ -101,7 +115,7 @@ void MQTTPublisher::loop()
   {
     poolUpdateTime = now;
 
-    bool forcedStateUpdate = true;
+    bool forcedStateUpdate = false;
     if (timeDiff(now, poolStateUpdateTime) >= CONFIG::FORCED_STATE_UPDATE_PERIOD)
     {
       poolStateUpdateTime = now;
@@ -117,7 +131,7 @@ void MQTTPublisher::loop()
       bool b = poolIO.isHeaterOn();
       if (b != SBH20IO::UNDEF::BOOL)
       {
-        mqttClient.publish(MQTT_TOPIC::HEATER, b? (poolIO.isHeaterStandby()? "standby" : "on") : "off", true);
+        mqttClient.publish(MQTT_TOPIC::HEATER, b? (poolIO.isHeaterStandby()? "standby" : "on") : "off", retainAll);
       }
 
       publishIfDefined(MQTT_TOPIC::WATER_ACT, poolIO.getActWaterTempCelsius(),     (int)SBH20IO::UNDEF::USHORT);
@@ -130,17 +144,17 @@ void MQTTPublisher::loop()
       unsigned int errorVal = poolIO.getErrorValue();
       if (errorVal == 0)
       {
-        mqttClient.publish(MQTT_TOPIC::STATE, "online", forcedStateUpdate);
+        mqttClient.publish(MQTT_TOPIC::STATE, "online", retainAll, forcedStateUpdate);
       }
       else
       {
-        mqttClient.publish(MQTT_TOPIC::STATE, "error", forcedStateUpdate);
+        mqttClient.publish(MQTT_TOPIC::STATE, "error", retainAll, forcedStateUpdate);
       }
-      mqttClient.publish(MQTT_TOPIC::ERROR, poolIO.getErrorMessage(errorVal).c_str(), true);
+      mqttClient.publish(MQTT_TOPIC::ERROR, poolIO.getErrorMessage(errorVal).c_str(), retainAll);
     }
     else
     {
-      mqttClient.publish(MQTT_TOPIC::STATE, "offline", forcedStateUpdate);
+      mqttClient.publish(MQTT_TOPIC::STATE, "offline", retainAll, forcedStateUpdate);
     }
 
     // update WiFi controller temperature and RSSI

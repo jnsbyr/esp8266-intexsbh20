@@ -35,7 +35,7 @@ bool OTAUpdate::start(const char* updateURL, MQTTClient& mqttClient)
 {
   bool success = false;
 
-  mqttClient.publish(MQTT_TOPIC::OTA, F("in progress"), true);
+  mqttClient.publish(MQTT_TOPIC::OTA, F("in progress"), false, true);
 
   // try to perform OTA update
   WiFiClient client;
@@ -60,7 +60,7 @@ bool OTAUpdate::start(const char* updateURL, MQTTClient& mqttClient)
     default:
       snprintf_P(buf, BUFFER_SIZE, PSTR("unknown result: %d"), ret);
   }
-  mqttClient.publish(MQTT_TOPIC::OTA, buf, true);
+  mqttClient.publish(MQTT_TOPIC::OTA, buf, false, true);
 
   return success;
 }

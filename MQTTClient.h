@@ -51,8 +51,8 @@ public:
   void loop();
 
   bool isConnected();
-  bool publish(const char* topic, const String& payload, bool force=false);
-
+  bool publish(const char* topic, const String& payload, bool retain=false, bool force=false);
+  
 private:
   static const unsigned int RECONNECT_DELAY = 3000; // [ms]
 
