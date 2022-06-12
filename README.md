@@ -3,11 +3,19 @@
 
 ### Table of contents
 
-[1. Motivation](#motivation)  
-[2. Hacking the SB-H20](#hacking-the-sb-h20)  
-[3. Building your own WiFi remote control](#building-your-own-wifi-remote-control)  
-[4. Contributing](#contributing)  
-[5. Licenses and Credits](#licenses-and-credits)
+[1. Compatibility](#compatibility)  
+[2. Motivation](#motivation)  
+[3. Hacking the SB-H20](#hacking-the-sb-h20)  
+[4. Building your own WiFi remote control](#building-your-own-wifi-remote-control)  
+[5. Contributing](#contributing)  
+[6. Licenses and Credits](#licenses-and-credits)
+
+
+## Compatibility
+
+This projects was originally designed for the Intex PureSpa SB-H20. It is reported
+to work with the Intex SimpleSpa SB–B20 but is not compatible with the Intex SSP
+and SJB models.
 
 
 ## Motivation
