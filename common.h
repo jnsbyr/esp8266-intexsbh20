@@ -89,14 +89,6 @@ namespace MQTT_TOPIC
   const char CMD_OTA[] = "wifi/command/update";
 }
 
-// Languages
-enum class LANG
-{
-  CODE = 0,
-  EN = 1,
-  DE = 2
-};
-
 // ESP8266 pins
 namespace PIN
 {

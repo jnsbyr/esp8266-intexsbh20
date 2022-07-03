@@ -304,7 +304,6 @@ private:
   bool changeWaterTemp(int up);
 
 private:
-  LANG language;
   unsigned long lastStateUpdateTime = 0;
 };
 

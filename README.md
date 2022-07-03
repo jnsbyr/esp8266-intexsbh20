@@ -190,8 +190,7 @@ Example:
   "mqttUser": "leave blank if you don't need authentication",
   "mqttPassword": "leave blank if you don't need authentication",
   "mqttRetain": "no",
-  "firmwareURL": "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
-  "errorLanguage": "EN"
+  "firmwareURL": "http://webserver.at.home/firmware/SB-H20-WiFiController.bin"
 }
 ```
 
@@ -199,9 +198,6 @@ If _mqttRetain_ is omitted the MQTT messages will be published without the
 retained flag set. If defined all values except "no" will activate retaining.
 
 If _firmwareURL_ is omitted OTA updates are disabled.
-
-For _errorLanguage_ you can choose between "EN" and "DE". If _errorLanguage_ is
-omitted, the control panel error code will be used.
 
 All other config values are mandatory. If you get a parsing error in the serial
 monitor when starting the MCU look closely into your config file. Maybe you
