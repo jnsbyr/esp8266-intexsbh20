@@ -148,30 +148,8 @@ namespace ERROR
   const char CODE_END[] PROGMEM = "END";
   const char CODE_OTHER[] PROGMEM = "EXX";
 
-  // English error messages
-  const char EN_90[] PROGMEM = "no water flow";
-  const char EN_94[] PROGMEM = "water temp too low";
-  const char EN_95[] PROGMEM = "water temp too high";
-  const char EN_96[] PROGMEM = "system error";
-  const char EN_97[] PROGMEM = "dry fire protection";
-  const char EN_99[] PROGMEM = "water temp sensor error";
-  const char EN_END[] PROGMEM = "heating aborted after 72h";
-  const char EN_OTHER[] PROGMEM = "error";
-
-  // German error messages
-  const char DE_90[] PROGMEM = "kein Wasserdurchfluss";
-  const char DE_94[] PROGMEM = "Wassertemperatur zu niedrig";
-  const char DE_95[] PROGMEM = "Wassertemperatur zu hoch";
-  const char DE_96[] PROGMEM = "Systemfehler";
-  const char DE_97[] PROGMEM = "Trocken-Brandschutz";
-  const char DE_99[] PROGMEM = "Wassertemperatursensor defekt";
-  const char DE_END[] PROGMEM = "Heizbetrieb nach 72 h deaktiviert";
-  const char DE_OTHER[] PROGMEM = "Störung";
-
-  const char *const TEXT[3][COUNT + 1] PROGMEM = {
-      {CODE_90, CODE_94, CODE_95, CODE_96, CODE_97, CODE_99, CODE_END, CODE_OTHER},
-      {EN_90, EN_94, EN_95, EN_96, EN_97, EN_99, EN_END, EN_OTHER},
-      {DE_90, DE_94, DE_95, DE_96, DE_97, DE_99, DE_END, DE_OTHER}};
+  const char *const TEXT[1][COUNT + 1] PROGMEM = {
+      {CODE_90, CODE_94, CODE_95, CODE_96, CODE_97, CODE_99, CODE_END, CODE_OTHER}};
 }
 
 // special display values
@@ -189,10 +167,8 @@ volatile SBH20IO::Buttons SBH20IO::buttons;
 // @TODO detect when latch signal stays low
 // @TODO detect act temp change during error
 // @TODO improve reliability of water temp change (counter auto repeat and too short press)
-void SBH20IO::setup(LANG language)
+void SBH20IO::setup()
 {
-  this->language = language;
-
   pinMode(PIN::CLOCK, INPUT);
   pinMode(PIN::DATA, INPUT);
   pinMode(PIN::LATCH, INPUT);
@@ -261,7 +237,7 @@ String SBH20IO::getErrorMessage(unsigned int errorValue) const
     }
 
     // load error text from PROGMEM
-    return FPSTR(ERROR::TEXT[(unsigned int)language][i]);
+    return FPSTR(ERROR::TEXT[0][i]);
   }
   else
   {

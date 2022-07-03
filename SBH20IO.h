@@ -144,7 +144,7 @@ public:
   };
 
 public:
-  void setup(LANG language);
+  void setup();
   void loop();
 
 public:
