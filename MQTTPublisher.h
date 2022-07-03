@@ -33,16 +33,15 @@ class MQTTClient;
 class SBH20IO;
 class NTCThermometer;
 
-
 class MQTTPublisher
 {
 public:
-  MQTTPublisher(MQTTClient& mqttClient, SBH20IO& poolIO, NTCThermometer& thermometer);
+  MQTTPublisher(MQTTClient &mqttClient, SBH20IO &poolIO, NTCThermometer &thermometer);
 
 public:
   void setRetainAll(bool retain);
   bool isRetainAll() const;
-  
+
 public:
   void loop();
 
@@ -50,19 +49,19 @@ private:
   static const unsigned int BUFFER_SIZE = 16;
 
 private:
-  void publish(const char* topic, int i);
-  void publish(const char* topic, unsigned int u);
+  void publish(const char *topic, int i);
+  void publish(const char *topic, unsigned int u);
 
-  void publishIfDefined(const char* topic, uint8 b, uint8 undef);
-  void publishIfDefined(const char* topic, uint16 i, uint16 undef);
-  void publishIfDefined(const char* topic, int i, int undef);
+  void publishIfDefined(const char *topic, uint8 b, uint8 undef);
+  void publishIfDefined(const char *topic, uint16 i, uint16 undef);
+  void publishIfDefined(const char *topic, int i, int undef);
 
-  void publishTemp(const char* topic, float t);
+  void publishTemp(const char *topic, float t);
 
 private:
-  MQTTClient& mqttClient;
-  SBH20IO& poolIO;
-  NTCThermometer& thermometer;
+  MQTTClient &mqttClient;
+  SBH20IO &poolIO;
+  NTCThermometer &thermometer;
   bool retainAll;
 
 private:
@@ -70,8 +69,6 @@ private:
   unsigned long poolStateUpdateTime = 0;
   unsigned long wifiStateUpdateTime = 0;
   char buf[BUFFER_SIZE];
-
 };
 
 #endif /* MQTT_PUBLISHER_H */
-

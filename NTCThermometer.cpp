@@ -28,7 +28,6 @@
 
 #include <Esp.h>
 
-
 // set ADC to read from input pin A0
 ADC_MODE(ADC_TOUT)
 
@@ -41,7 +40,7 @@ void NTCThermometer::setup(unsigned int refResistance, float refVoltage, float a
 {
   this->refResistance = refResistance;
   this->refVoltage = refVoltage;
-  this->adcScale = adcScale/1024; // -> [V/digit]
+  this->adcScale = adcScale / 1024; // -> [V/digit]
 }
 
 /**
@@ -53,7 +52,7 @@ float NTCThermometer::analogReadMultiple()
 {
   long sum = 0;
   unsigned int count = 0;
-  for (unsigned int i=0; i<CONSECUTIVE_SAMPLES; i++)
+  for (unsigned int i = 0; i < CONSECUTIVE_SAMPLES; i++)
   {
     int sample = analogRead(A0);
     if (sample >= 0)
@@ -68,7 +67,7 @@ float NTCThermometer::analogReadMultiple()
     count = 1;
   }
 
-  return (float)sum/count;
+  return (float)sum / count;
 }
 
 /**
@@ -79,7 +78,7 @@ float NTCThermometer::analogReadMultiple()
  */
 int NTCThermometer::getResistance()
 {
-  return round((refVoltage/(adcScale*analogReadMultiple()) - 1)*refResistance);
+  return round((refVoltage / (adcScale * analogReadMultiple()) - 1) * refResistance);
 }
 
 /**
@@ -94,7 +93,7 @@ float NTCThermometer::getTemperature()
   // calculate current temperature and
   // update temperature history ring buffer
   float x = log(getResistance());
-  history[historyHead++] = 1.0f / (0.001129148f + 0.000234125f*x + 0.0000000876741f*x*x*x) - 273.15f;
+  history[historyHead++] = 1.0f / (0.001129148f + 0.000234125f * x + 0.0000000876741f * x * x * x) - 273.15f;
   historyHead %= HISTORY_DEPTH;
   if (historyDepth < HISTORY_DEPTH)
   {
@@ -103,10 +102,10 @@ float NTCThermometer::getTemperature()
 
   // calculate block moving average
   float sum = 0;
-  for (unsigned int i=0; i<historyDepth; i++)
+  for (unsigned int i = 0; i < historyDepth; i++)
   {
     sum += history[i];
   }
 
-  return sum/historyDepth;
+  return sum / historyDepth;
 }

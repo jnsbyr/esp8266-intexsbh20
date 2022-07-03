@@ -27,7 +27,6 @@
 #ifndef NTC_THERMOMETER_H
 #define NTC_THERMOMETER_H
 
-
 class NTCThermometer
 {
 public:
@@ -39,16 +38,16 @@ public:
 private:
   // quality parameters
   static const unsigned int CONSECUTIVE_SAMPLES = 10; // [samples] number of temperature samples taken in a row to be averaged
-  static const unsigned int HISTORY_DEPTH       = 10; // [samples] number of temperature moving average history depth
+  static const unsigned int HISTORY_DEPTH = 10;       // [samples] number of temperature moving average history depth
 
 private:
   float analogReadMultiple();
   int getResistance();
 
 private:
-  unsigned int refResistance = 22000;              // [Ohm] reference resistance
-  float refVoltage           =  3.3f;              // [V] reference voltage, Wemos D1 mini voltage regulator output
-  float adcScale             = 320.0f/100.0f/1024; // [V/digit] ESP8266 10-bit ADC, Wemos D1 mini voltage divider 220 kOhm - 100 kOhm
+  unsigned int refResistance = 22000;      // [Ohm] reference resistance
+  float refVoltage = 3.3f;                 // [V] reference voltage, Wemos D1 mini voltage regulator output
+  float adcScale = 320.0f / 100.0f / 1024; // [V/digit] ESP8266 10-bit ADC, Wemos D1 mini voltage divider 220 kOhm - 100 kOhm
 
 private:
   float history[HISTORY_DEPTH];
@@ -57,4 +56,3 @@ private:
 };
 
 #endif /* NTC_THERMOMETER_H */
-

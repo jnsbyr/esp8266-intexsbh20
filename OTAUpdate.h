@@ -29,13 +29,10 @@
 
 class MQTTClient;
 
-
 class OTAUpdate
 {
 public:
-  bool start(const char* updateURL, MQTTClient& mqttClient);
-
+  bool start(const char *updateURL, MQTTClient &mqttClient);
 };
 
 #endif /* OTA_UPDATE_H */
-

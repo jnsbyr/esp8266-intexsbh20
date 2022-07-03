@@ -33,7 +33,6 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-
 /**
  * see https://github.com/knolleary/pubsubclient
  */
@@ -43,22 +42,22 @@ public:
   MQTTClient() : mqttClient(wifiClient) {}
 
 public:
-  void addMetadata(const char* topic, const char* message);
-  void addSubscriber(const char* topic, void (*setter)(bool value));
-  void addSubscriber(const char* topic, void (*setter)(int value));
+  void addMetadata(const char *topic, const char *message);
+  void addSubscriber(const char *topic, void (*setter)(bool value));
+  void addSubscriber(const char *topic, void (*setter)(int value));
 
-  void setup(const char* mqttServer, const char* mqttUsername, const char* mqttPassword,const char* clientId, const char* willTopic, const char* willMessage);
+  void setup(const char *mqttServer, const char *mqttUsername, const char *mqttPassword, const char *clientId, const char *willTopic, const char *willMessage);
   void loop();
 
   bool isConnected();
-  bool publish(const char* topic, const String& payload, bool retain=false, bool force=false);
-  
+  bool publish(const char *topic, const String &payload, bool retain = false, bool force = false);
+
 private:
   static const unsigned int RECONNECT_DELAY = 3000; // [ms]
 
 private:
   // PubSubClient callback
-  void subscriptionUpdate(char* topic, byte* message, unsigned int length);
+  void subscriptionUpdate(char *topic, byte *message, unsigned int length);
 
 private:
   void reconnect();
@@ -66,18 +65,18 @@ private:
 private:
   PubSubClient mqttClient;
   WiFiClient wifiClient;
-  const char* clientId;
-  const char* willTopic;
-  const char* willMessage;
-  const char* mqttuser;
-  const char* mqttpw;
+  const char *clientId;
+  const char *willTopic;
+  const char *willMessage;
+  const char *mqttuser;
+  const char *mqttpw;
 
 private:
   std::map<String, String> metadata;
   std::map<String, String> publications;
 
-  std::map<String, std::function<void (bool)>> boolSubscriber;
-  std::map<String, std::function<void (int)>> intSubscriber;
+  std::map<String, std::function<void(bool)>> boolSubscriber;
+  std::map<String, std::function<void(int)>> intSubscriber;
 
 private:
   unsigned int now;

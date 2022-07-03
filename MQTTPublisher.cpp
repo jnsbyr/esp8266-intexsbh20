@@ -31,12 +31,10 @@
 #include "NTCThermometer.h"
 #include "common.h"
 
-
-MQTTPublisher::MQTTPublisher(MQTTClient& mqttClient, SBH20IO& poolIO, NTCThermometer& thermometer) :
-  mqttClient(mqttClient),
-  poolIO(poolIO),
-  thermometer(thermometer),
-  retainAll(false)
+MQTTPublisher::MQTTPublisher(MQTTClient &mqttClient, SBH20IO &poolIO, NTCThermometer &thermometer) : mqttClient(mqttClient),
+                                                                                                     poolIO(poolIO),
+                                                                                                     thermometer(thermometer),
+                                                                                                     retainAll(false)
 {
 }
 
@@ -53,43 +51,43 @@ bool MQTTPublisher::isRetainAll() const
   return retainAll;
 }
 
-void MQTTPublisher::publishIfDefined(const char* topic, uint8 b, uint8 undef)
+void MQTTPublisher::publishIfDefined(const char *topic, uint8 b, uint8 undef)
 {
   if (b != undef)
   {
-    mqttClient.publish(topic, b? "on" : "off", retainAll);
+    mqttClient.publish(topic, b ? "on" : "off", retainAll);
   }
 }
 
-void MQTTPublisher::publishIfDefined(const char* topic, int i, int undef)
+void MQTTPublisher::publishIfDefined(const char *topic, int i, int undef)
 {
   if (i != undef)
   {
-     publish(topic, i);
+    publish(topic, i);
   }
 }
 
-void MQTTPublisher::publishIfDefined(const char* topic, uint16 u, uint16 undef)
+void MQTTPublisher::publishIfDefined(const char *topic, uint16 u, uint16 undef)
 {
   if (u != undef)
   {
-     publish(topic, u);
+    publish(topic, u);
   }
 }
 
-void MQTTPublisher::publish(const char* topic, int i)
+void MQTTPublisher::publish(const char *topic, int i)
 {
   snprintf(buf, BUFFER_SIZE, "%d", i);
   mqttClient.publish(topic, buf, retainAll);
 }
 
-void MQTTPublisher::publish(const char* topic, unsigned int u)
+void MQTTPublisher::publish(const char *topic, unsigned int u)
 {
   snprintf(buf, BUFFER_SIZE, "%u", u);
   mqttClient.publish(topic, buf, retainAll);
 }
 
-void MQTTPublisher::publishTemp(const char* topic, float t)
+void MQTTPublisher::publishTemp(const char *topic, float t)
 {
   snprintf(buf, BUFFER_SIZE, "%.0f", t);
   if (t >= -60 && t <= 145)
@@ -126,15 +124,15 @@ void MQTTPublisher::loop()
     {
       publishIfDefined(MQTT_TOPIC::BUBBLE, poolIO.isBubbleOn(), SBH20IO::UNDEF::BOOL);
       publishIfDefined(MQTT_TOPIC::FILTER, poolIO.isFilterOn(), SBH20IO::UNDEF::BOOL);
-      publishIfDefined(MQTT_TOPIC::POWER,  poolIO.isPowerOn(),  SBH20IO::UNDEF::BOOL);
+      publishIfDefined(MQTT_TOPIC::POWER, poolIO.isPowerOn(), SBH20IO::UNDEF::BOOL);
 
       bool b = poolIO.isHeaterOn();
       if (b != SBH20IO::UNDEF::BOOL)
       {
-        mqttClient.publish(MQTT_TOPIC::HEATER, b? (poolIO.isHeaterStandby()? "standby" : "on") : "off", retainAll);
+        mqttClient.publish(MQTT_TOPIC::HEATER, b ? (poolIO.isHeaterStandby() ? "standby" : "on") : "off", retainAll);
       }
 
-      publishIfDefined(MQTT_TOPIC::WATER_ACT, poolIO.getActWaterTempCelsius(),     (int)SBH20IO::UNDEF::USHORT);
+      publishIfDefined(MQTT_TOPIC::WATER_ACT, poolIO.getActWaterTempCelsius(), (int)SBH20IO::UNDEF::USHORT);
       publishIfDefined(MQTT_TOPIC::WATER_SET, poolIO.getDesiredWaterTempCelsius(), (int)SBH20IO::UNDEF::USHORT);
 
 #ifdef SERIAL_DEBUG

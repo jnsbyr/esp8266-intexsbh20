@@ -1,6 +1,5 @@
 # MQTT WiFi remote control for the Intex PureSpa SB-H20 whirlpool
 
-
 ### Table of contents
 
 [1. Compatibility](#compatibility)  
@@ -10,13 +9,11 @@
 [5. Contributing](#contributing)  
 [6. Licenses and Credits](#licenses-and-credits)
 
-
 ## Compatibility
 
 This projects was originally designed for the Intex PureSpa SB-H20. It is reported
 to work with the Intex SimpleSpa SB–B20 but is not compatible with the Intex SSP
 and SJB models.
-
 
 ## Motivation
 
@@ -37,7 +34,6 @@ be done then the water temperature could also be controlled, thus combining powe
 saving and comfort. Depending on the temperature profile you choose the energy
 saving can be really significant compared to a constant temperature setting
 because the heater consumes around 2 kW.
-
 
 ## Hacking the SB-H20
 
@@ -105,7 +101,6 @@ significantly. To prevent this I decided to activate the ESP8266 WiFi modem slee
 when changing the water temperature. This improves the reliability noticeably but
 the ESP8266 looses its connection to the AP and the MQTT server for a few seconds.
 
-
 ## Building your own WiFi remote control
 
 So far the SB-H20 was not modified. To keep it that way an Intex control panel
@@ -115,9 +110,9 @@ find a source. If you have access to a 3D printer you should have a look at this
 and tap the cable from the control panel to the main board.
 
 > :warning: **WARNING**: If you decide to continue you will void your warranty
-  for the SB-H20. You may only **USE THIS PROJECT AT YOUR OWN RISK**.
-  I do not provide any warranty and I will not assume any responsibility for any
-  damage you cause yourself or others by using this project.
+> for the SB-H20. You may only **USE THIS PROJECT AT YOUR OWN RISK**.
+> I do not provide any warranty and I will not assume any responsibility for any
+> damage you cause yourself or others by using this project.
 
 ### PCB
 
@@ -144,11 +139,10 @@ the [thermometer](#wifi-controller-thermometer) below.
 
 Select a case that is IP64 or better to protect the circuit from moisture
 and to protect the pool users from electrical shock. The same applies to the
-cables and plugs. For my solution these components were the most expensive 
+cables and plugs. For my solution these components were the most expensive
 part of the project at around 30 EUR.
 
 ![CableTree](assets/CableTree.jpg "modified cable tree of Intex SB-H20 control panel")
-
 
 ### Power Supply
 
@@ -181,33 +175,33 @@ appropriately.
 
 ### Configuration
 
-Edit the example configuration file *config.json* in the subdirectory *data*.
+Edit the example configuration file _config.json_ in the subdirectory _data_.
 If you install the [Arduino ESP8266 LittleFS Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin)
-you can use the *Tools* menu of the Arduino IDE to upload the content of the *data*
+you can use the _Tools_ menu of the Arduino IDE to upload the content of the _data_
 subdirectory to the MCU.
 
 Example:
 
 ```json
 {
- "wifiSSID":       "WiFi-SSID",
- "wifiPassphrase": "WiFi-secret",
- "mqttServer":     "mqtt.at.home",
- "mqttUser":       "leave blank if you don't need authentication",
- "mqttPassword":   "leave blank if you don't need authentication",
- "mqttRetain":     "no",
- "firmwareURL":    "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
- "errorLanguage":  "EN"
+  "wifiSSID": "WiFi-SSID",
+  "wifiPassphrase": "WiFi-secret",
+  "mqttServer": "mqtt.at.home",
+  "mqttUser": "leave blank if you don't need authentication",
+  "mqttPassword": "leave blank if you don't need authentication",
+  "mqttRetain": "no",
+  "firmwareURL": "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
+  "errorLanguage": "EN"
 }
 ```
 
-If *mqttRetain* is omitted the MQTT messages will be published without the 
+If _mqttRetain_ is omitted the MQTT messages will be published without the
 retained flag set. If defined all values except "no" will activate retaining.
 
-If *firmwareURL* is omitted OTA updates are disabled.
+If _firmwareURL_ is omitted OTA updates are disabled.
 
-For *errorLanguage* you can choose between "EN" and "DE". If *errorLanguage* is
-omitted, the control panel error code will be used. 
+For _errorLanguage_ you can choose between "EN" and "DE". If _errorLanguage_ is
+omitted, the control panel error code will be used.
 
 All other config values are mandatory. If you get a parsing error in the serial
 monitor when starting the MCU look closely into your config file. Maybe you
@@ -219,38 +213,38 @@ Prepare your MQTT server for a new device.
 
 **Published Topics**
 
- Topic              | Values                 | Unit | Notes
- ------------------ |:----------------------:|:----:| -----------------------------------
- pool/bubble        | on\|off                |      |
- pool/filter        | on\|off                |      |
- pool/heater        | on\|standby\|off       |      |
- pool/power         | on\|off                |      |
- pool/water/tempAct | int                    | °C   |
- pool/water/tempSet | int                    | °C   |
- pool/error         | string                 |      | error message (see manual) or empty
- pool/model         | string                 |      | metadata
- wifi/rssi          | int                    | dBm  |
- wifi/state         | online\|offline\|error |      | last will topic, offline is retained value
- wifi/temp          | int                    | °C   | inside temp of WiFi module case
- wifi/version       | string                 |      | metadata
- wifi/update        | string                 |      | status message
+| Topic              |         Values         | Unit | Notes                                      |
+| ------------------ | :--------------------: | :--: | ------------------------------------------ |
+| pool/bubble        |        on\|off         |      |
+| pool/filter        |        on\|off         |      |
+| pool/heater        |    on\|standby\|off    |      |
+| pool/power         |        on\|off         |      |
+| pool/water/tempAct |          int           |  °C  |
+| pool/water/tempSet |          int           |  °C  |
+| pool/error         |         string         |      | error message (see manual) or empty        |
+| pool/model         |         string         |      | metadata                                   |
+| wifi/rssi          |          int           | dBm  |
+| wifi/state         | online\|offline\|error |      | last will topic, offline is retained value |
+| wifi/temp          |          int           |  °C  | inside temp of WiFi module case            |
+| wifi/version       |         string         |      | metadata                                   |
+| wifi/update        |         string         |      | status message                             |
 
 The topics will be published once after the connection to the MQTT server is established and
-then only on change except for the topic *wifi/state*, with a change rate limit of 1 per
+then only on change except for the topic _wifi/state_, with a change rate limit of 1 per
 second.
 
 **Subscribed Topics**
 
-| Topic                      | Values  | Unit | Notes
-| -------------------------- |:-------:|:----:| -----------------------------------
+| Topic                      | Values  | Unit | Notes            |
+| -------------------------- | :-----: | :--: | ---------------- |
 | pool/command/bubble        | on\|off |      |
 | pool/command/filter        | on\|off |      |
 | pool/command/heater        | on\|off |      |
 | pool/command/power         | on\|off |      |
-| pool/command/water/tempSet | int     | °C   |
-| wifi/command/update        | on      |      | start OTA update
+| pool/command/water/tempSet |   int   |  °C  |
+| wifi/command/update        |   on    |      | start OTA update |
 
-The *pool* topics are equivalent to the buttons on the control panel of the SB-H20.
+The _pool_ topics are equivalent to the buttons on the control panel of the SB-H20.
 Refer to the user manual for more details.
 
 Wait for the next update of the equivalent published topic after each command and
@@ -258,7 +252,7 @@ use a timeout to detect command failure. The SB-H20 control panel can only handl
 one command at a time. The duration for changing the water temperature depends on
 the temperature delta.
 
-If *wifi/state* is *error* you are only allowed to send the command *pool/command/power=off*.
+If _wifi/state_ is _error_ you are only allowed to send the command _pool/command/power=off_.
 The SB-H20 will continue to beep for a while. To clear the error it is necessary
 to power down the SB-H20.
 
@@ -281,12 +275,14 @@ If you need a higher accuracy you can calibrate the thermometer by providing the
 following 4 values that should be measured with a mulitmeter with at least 3 digits
 accuracy:
 
-*ESP module not attached to circuit and not powered on:*
+_ESP module not attached to circuit and not powered on:_
+
 - Re: resistance between ESP module A0 and GND
 - Rt: resistance between ESP8266 A0 and GND
 - Rr: resistance between NTC and GND
 
-*circuit powered on:*
+_circuit powered on:_
+
 - Vr: supply voltage at NTC
 
 Insert these values into the thermometer setup command in the INO file:
@@ -340,11 +336,9 @@ cover was closed.
 One up would be to use encryption for the MQTT communication but the MQTT
 client library currently does not support it.
 
-
 ## Contributing
 
 If you want something clarified or improved you may raise an [issue](https://github.com/jnsbyr/esp8266-intexsbh20).
-
 
 ## Licenses and Credits
 
@@ -362,7 +356,6 @@ The signal analysis was aided by [PulseView](https://sigrok.org/).
 
 The badges in this document are provided by [img.shields.io](https://img.shields.io/).
 
-
 The firmware source code depends on the following projects:
 
 #### ESP8266 Core
@@ -373,24 +366,23 @@ Copyright (C) 2015 [Arduino Core for ESP8266 Project](https://github.com/esp8266
 
 Parts of the "Arduino Core for ESP8266" project have different licenses, see the project description for more details.
 
-#### ArduinoJson ####
+#### ArduinoJson
 
 Copyright (C) 2014 [Benoît Blanchon](https://arduinojson.org)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md)
 
-#### LittleFS ####
+#### LittleFS
 
 Copyright (C) 2017 [Arm Limited](https://github.com/littlefs-project/littlefs)
 
 [![License: MIT](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/littlefs-project/littlefs/blob/master/LICENSE.md)
 
-#### PubSubClient ####
+#### PubSubClient
 
 Copyright (C) 2008 [Nicholas O'Leary](https://github.com/knolleary/pubsubclient)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/knolleary/pubsubclient/blob/master/LICENSE.txt)
-
 
 The concept of this project and parts of the firmware are based on:
 

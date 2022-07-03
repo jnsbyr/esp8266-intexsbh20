@@ -30,8 +30,7 @@
 #include "MQTTClient.h"
 #include "common.h"
 
-
-bool OTAUpdate::start(const char* updateURL, MQTTClient& mqttClient)
+bool OTAUpdate::start(const char *updateURL, MQTTClient &mqttClient)
 {
   bool success = false;
 
@@ -44,21 +43,21 @@ bool OTAUpdate::start(const char* updateURL, MQTTClient& mqttClient)
   char buf[BUFFER_SIZE];
   switch (ret)
   {
-    case HTTP_UPDATE_FAILED:
-      snprintf_P(buf, BUFFER_SIZE, PSTR("failed: %s (error code %d)"), ESPhttpUpdate.getLastErrorString().c_str(), ESPhttpUpdate.getLastError());
-      break;
+  case HTTP_UPDATE_FAILED:
+    snprintf_P(buf, BUFFER_SIZE, PSTR("failed: %s (error code %d)"), ESPhttpUpdate.getLastErrorString().c_str(), ESPhttpUpdate.getLastError());
+    break;
 
-    case HTTP_UPDATE_NO_UPDATES:
-      snprintf_P(buf, BUFFER_SIZE, PSTR("none available"));
-      break;
+  case HTTP_UPDATE_NO_UPDATES:
+    snprintf_P(buf, BUFFER_SIZE, PSTR("none available"));
+    break;
 
-    case HTTP_UPDATE_OK:
-      snprintf_P(buf, BUFFER_SIZE, PSTR("success"));
-      success = true;
-      break;
+  case HTTP_UPDATE_OK:
+    snprintf_P(buf, BUFFER_SIZE, PSTR("success"));
+    success = true;
+    break;
 
-    default:
-      snprintf_P(buf, BUFFER_SIZE, PSTR("unknown result: %d"), ret);
+  default:
+    snprintf_P(buf, BUFFER_SIZE, PSTR("unknown result: %d"), ret);
   }
   mqttClient.publish(MQTT_TOPIC::OTA, buf, false, true);
 
