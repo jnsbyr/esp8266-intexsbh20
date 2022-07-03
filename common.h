@@ -53,7 +53,6 @@ namespace CONFIG_TAG
 
   const char WIFI_SSID[] = "wifiSSID";
   const char WIFI_PASSPHRASE[] = "wifiPassphrase";
-  const char WIFI_OTA_URL[] = "firmwareURL";
 
   const char MQTT_SERVER[] = "mqttServer";
   const char MQTT_USER[] = "mqttUser";
@@ -78,7 +77,6 @@ namespace MQTT_TOPIC
   const char RSSI[] = "wifi/rssi";
   const char WIFI_TEMP[] = "wifi/temp";
   const char STATE[] = "wifi/state";
-  const char OTA[] = "wifi/update";
 
   // subscribe
   const char CMD_BUBBLE[] = "pool/command/bubble";
@@ -86,7 +84,6 @@ namespace MQTT_TOPIC
   const char CMD_HEATER[] = "pool/command/heater";
   const char CMD_POWER[] = "pool/command/power";
   const char CMD_WATER[] = "pool/command/water/tempSet";
-  const char CMD_OTA[] = "wifi/command/update";
 }
 
 // ESP8266 pins

@@ -189,15 +189,12 @@ Example:
   "mqttServer": "mqtt.at.home",
   "mqttUser": "leave blank if you don't need authentication",
   "mqttPassword": "leave blank if you don't need authentication",
-  "mqttRetain": "no",
-  "firmwareURL": "http://webserver.at.home/firmware/SB-H20-WiFiController.bin"
+  "mqttRetain": "no"
 }
 ```
 
 If _mqttRetain_ is omitted the MQTT messages will be published without the
 retained flag set. If defined all values except "no" will activate retaining.
-
-If _firmwareURL_ is omitted OTA updates are disabled.
 
 All other config values are mandatory. If you get a parsing error in the serial
 monitor when starting the MCU look closely into your config file. Maybe you
@@ -231,14 +228,13 @@ second.
 
 **Subscribed Topics**
 
-| Topic                      | Values  | Unit | Notes            |
-| -------------------------- | :-----: | :--: | ---------------- |
+| Topic                      | Values  | Unit | Notes |
+| -------------------------- | :-----: | :--: | ----- |
 | pool/command/bubble        | on\|off |      |
 | pool/command/filter        | on\|off |      |
 | pool/command/heater        | on\|off |      |
 | pool/command/power         | on\|off |      |
 | pool/command/water/tempSet |   int   |  °C  |
-| wifi/command/update        |   on    |      | start OTA update |
 
 The _pool_ topics are equivalent to the buttons on the control panel of the SB-H20.
 Refer to the user manual for more details.

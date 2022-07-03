@@ -49,7 +49,6 @@
  */
 
 #include "NTCThermometer.h"
-#include "OTAUpdate.h"
 #include "SBH20IO.h"
 #include "ConfigurationFile.h"
 #include "MQTTClient.h"
@@ -58,7 +57,6 @@
 
 ConfigurationFile config;
 NTCThermometer thermometer;
-OTAUpdate otaUpdate;
 
 SBH20IO poolIO;
 
@@ -106,12 +104,7 @@ void setup()
                                { poolIO.setPowerOn(b); });
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER, [](int i) -> void
                                { poolIO.setDesiredWaterTempCelsius(i); });
-      if (config.exists(CONFIG_TAG::WIFI_OTA_URL))
-      {
-        // enable OTA update if URL is defined in config
-        mqttClient.addSubscriber(MQTT_TOPIC::CMD_OTA, [](bool b) -> void
-                                 { if (b) otaUpdate.start(config.get(CONFIG_TAG::WIFI_OTA_URL), mqttClient); });
-      }
+
       mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
