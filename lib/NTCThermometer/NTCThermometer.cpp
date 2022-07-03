@@ -25,7 +25,6 @@
  */
 
 #include "NTCThermometer.h"
-
 #include <Esp.h>
 
 
