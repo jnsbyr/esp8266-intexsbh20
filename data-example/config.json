@@ -1,0 +1,8 @@
+{
+  "wifiSSID": "WiFi-SSID",
+  "wifiPassphrase": "WiFi-Secret",
+  "mqttServer": "mqtt.at.home",
+  "mqttUser": "leave blank if you don't have authentication",
+  "mqttPassword": "leave blank if you don't have authentication",
+  "mqttRetain": "no"
+}
