@@ -28,7 +28,7 @@
 #define COMMON_H
 
 #include <limits.h>
-#include <../d1_mini/pins_arduino.h>
+#include <../d1_mini32/pins_arduino.h>
 
 //#define SERIAL_DEBUG
 

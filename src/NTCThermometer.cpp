@@ -28,9 +28,6 @@
 
 #include <Esp.h>
 
-// set ADC to read from input pin A0
-ADC_MODE(ADC_TOUT)
-
 /**
  * @param refResistance resistance between NTC and GND [Ohm]
  * @param refVoltage voltage at NTC [V]

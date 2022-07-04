@@ -276,15 +276,10 @@ private:
 
 private:
   // ISR and ISR helper
-  static IRAM_ATTR void clockRisingISR(void *arg);
-  static IRAM_ATTR inline void decodeDisplay();
-  static IRAM_ATTR inline void decodeLED();
-  static IRAM_ATTR inline void decodeButton();
-  /*
-    IRAM_ATTR inline void decodeDisplay();
-    IRAM_ATTR inline void decodeLED();
-    IRAM_ATTR inline void decodeButton();
-  */
+  static void clockRisingISR(void *arg);
+  static inline void decodeDisplay();
+  static inline void decodeLED();
+  static inline void decodeButton();
 
 private:
   // ISR variables

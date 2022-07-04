@@ -75,7 +75,6 @@ void setup()
 
   // print versions
   Serial.printf_P(PSTR("SB-H20 WiFi Controller %s\n"), CONFIG::WIFI_VERSION);
-  Serial.printf_P(PSTR("build with Arduino Core for ESP8266 %s\n"), ESP.getCoreVersion().c_str());
   Serial.printf_P(PSTR("based on Espressif NONOS SDK %s\n"), ESP.getSdkVersion());
 
   // try to load config file
@@ -110,21 +109,12 @@ void setup()
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f / 100.f); // measured: 21990, 3.327f, 319.f/99.6f
 
-      // enable hardware watchdog (8.3 s) by disabling software watchdog
-      ESP.wdtDisable();
-
       ready = true;
     }
     catch (std::runtime_error const &re)
     {
       Serial.println(re.what());
     }
-  }
-
-  // stop CPU if init failed
-  if (!ready)
-  {
-    ESP.deepSleep(ESP.deepSleepMax(), RF_DISABLED);
   }
 }
 
@@ -133,9 +123,6 @@ void setup()
  */
 void loop()
 {
-  // keep hardware watchdog alive
-  ESP.wdtFeed();
-
   wl_status_t wifiStatus = WiFi.status(); //  WL_IDLE_STATUS 0, WL_NO_SSID_AVAIL 1, WL_SCAN_COMPLETED 2, WL_CONNECTED 3, WL_CONNECT_FAILED 4, WL_CONNECTION_LOST 5, WL_DISCONNECTED 6, WL_NO_SHIELD 255
   unsigned long now = millis();
   if (wifiStatus == WL_CONNECTED)

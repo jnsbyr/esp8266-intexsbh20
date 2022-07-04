@@ -30,7 +30,7 @@
 #include <functional>
 #include <map>
 
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 
 /**

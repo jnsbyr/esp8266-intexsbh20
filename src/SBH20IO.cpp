@@ -27,8 +27,7 @@
  */
 
 #include "SBH20IO.h"
-
-#include <ESP8266WiFi.h>
+#include "esp32-hal.h"
 
 // bit mask for LEDs
 namespace FRAME_LED
@@ -332,7 +331,6 @@ void SBH20IO::setDesiredWaterTempCelsius(int temp)
       // DEBUG_MSG("\nBdelta %d", deltaTemp);
       while (deltaTemp)
       {
-        ESP.wdtFeed();
         if (deltaTemp > 0)
         {
           // DEBUG_MSG("\nBU");
@@ -508,7 +506,7 @@ uint16_t SBH20IO::convertDisplayToCelsius(uint16_t value) const
   return (celsiusValue >= 0) && (celsiusValue <= 60) ? celsiusValue : UNDEF::USHORT;
 }
 
-ICACHE_RAM_ATTR void SBH20IO::clockRisingISR(void *arg)
+void SBH20IO::clockRisingISR(void *arg)
 {
   bool data = !digitalRead(PIN::DATA);
   bool enable = digitalRead(PIN::LATCH) == LOW;
@@ -567,7 +565,7 @@ ICACHE_RAM_ATTR void SBH20IO::clockRisingISR(void *arg)
   }
 }
 
-ICACHE_RAM_ATTR inline void SBH20IO::decodeDisplay()
+inline void SBH20IO::decodeDisplay()
 {
   uint8_t digit;
   switch (isrState.frameValue & FRAME_DIGIT::SEGMENTS)
@@ -814,7 +812,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeDisplay()
   // else not all digits set yet
 }
 
-ICACHE_RAM_ATTR inline void SBH20IO::decodeLED()
+inline void SBH20IO::decodeLED()
 {
   if (isrState.frameValue == isrState.latestLedStatus)
   {
@@ -848,7 +846,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeLED()
   }
 }
 
-ICACHE_RAM_ATTR inline void SBH20IO::decodeButton()
+inline void SBH20IO::decodeButton()
 {
   if (isrState.frameValue & FRAME_BUTTON::FILTER)
   {
