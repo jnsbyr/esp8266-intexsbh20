@@ -89,9 +89,9 @@ namespace MQTT_TOPIC
 // ESP8266 pins
 namespace PIN
 {
-  const uint8 CLOCK = D5;
-  const uint8 DATA = D6;
-  const uint8 LATCH = D7;
+  const uint8_t CLOCK = D5;
+  const uint8_t DATA = D6;
+  const uint8_t LATCH = D7;
 }
 
 // serial debugging

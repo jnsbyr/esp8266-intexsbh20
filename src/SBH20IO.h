@@ -29,7 +29,7 @@
 #ifndef SBH20IO_H
 #define SBH20IO_H
 
-#include <c_types.h>
+#include <stdint.h>
 #include <WString.h>
 #include "common.h"
 
@@ -132,8 +132,8 @@ public:
   class UNDEF
   {
   public:
-    static const uint8 BOOL = 0xFF;
-    static const uint16 USHORT = 0xFFFF;
+    static const uint8_t BOOL = 0xFF;
+    static const uint16_t USHORT = 0xFFFF;
   };
 
   class WATER_TEMP
@@ -153,12 +153,12 @@ public:
   int getActWaterTempCelsius() const;
   int getDesiredWaterTempCelsius() const;
 
-  uint8 isBubbleOn() const;
-  uint8 isFilterOn() const;
-  uint8 isHeaterOn() const;
-  uint8 isHeaterStandby() const;
-  uint8 isPowerOn() const;
-  uint8 isBuzzerOn() const;
+  uint8_t isBubbleOn() const;
+  uint8_t isFilterOn() const;
+  uint8_t isHeaterOn() const;
+  uint8_t isHeaterStandby() const;
+  uint8_t isPowerOn() const;
+  uint8_t isBuzzerOn() const;
 
   void setDesiredWaterTempCelsius(int temp);
 
@@ -220,12 +220,12 @@ private:
 private:
   struct State
   {
-    uint16 waterTemp = UNDEF::USHORT;
-    uint16 desiredTemp = UNDEF::USHORT;
-    uint16 ledStatus = UNDEF::USHORT;
+    uint16_t waterTemp = UNDEF::USHORT;
+    uint16_t desiredTemp = UNDEF::USHORT;
+    uint16_t ledStatus = UNDEF::USHORT;
 
     bool buzzer = false;
-    uint16 error = 0;
+    uint16_t error = 0;
     unsigned int lastErrorChangeFrameCounter = 0;
 
     bool online = false;
@@ -237,13 +237,13 @@ private:
 
   struct IsrState
   {
-    uint16 latestWaterTemp = UNDEF::USHORT;
-    uint16 latestBlinkingTemp = UNDEF::USHORT;
-    uint16 latestLedStatus = UNDEF::USHORT;
-    uint8 latestTempUnit = 0;
+    uint16_t latestWaterTemp = UNDEF::USHORT;
+    uint16_t latestBlinkingTemp = UNDEF::USHORT;
+    uint16_t latestLedStatus = UNDEF::USHORT;
+    uint8_t latestTempUnit = 0;
 
-    uint16 frameValue = 0;
-    uint16 receivedBits = 0;
+    uint16_t frameValue = 0;
+    uint16_t receivedBits = 0;
 
     unsigned int lastBlankDisplayFrameCounter = 0;
     unsigned int blankCounter = 0;
@@ -254,10 +254,10 @@ private:
     unsigned int stableBlinkingWaterTempCount = 0;
     unsigned int stableLedStatusCount = CONFIRM_FRAMES::LED;
 
-    uint16 displayValue = UNDEF::USHORT;
-    uint16 latestDisplayValue = UNDEF::USHORT;
+    uint16_t displayValue = UNDEF::USHORT;
+    uint16_t latestDisplayValue = UNDEF::USHORT;
 
-    uint16 receivedDigits = 0;
+    uint16_t receivedDigits = 0;
 
     bool isDisplayBlinking = false;
 
@@ -298,7 +298,7 @@ private:
    */
 
 private:
-  uint16 convertDisplayToCelsius(uint16 value) const;
+  uint16_t convertDisplayToCelsius(uint16_t value) const;
   bool waitBuzzerOff() const;
   bool pressButton(volatile unsigned int &buttonPressCount);
   bool changeWaterTemp(int up);

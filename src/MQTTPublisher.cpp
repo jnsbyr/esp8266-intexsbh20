@@ -51,7 +51,7 @@ bool MQTTPublisher::isRetainAll() const
   return retainAll;
 }
 
-void MQTTPublisher::publishIfDefined(const char *topic, uint8 b, uint8 undef)
+void MQTTPublisher::publishIfDefined(const char *topic, uint8_t b, uint8_t undef)
 {
   if (b != undef)
   {
@@ -67,7 +67,7 @@ void MQTTPublisher::publishIfDefined(const char *topic, int i, int undef)
   }
 }
 
-void MQTTPublisher::publishIfDefined(const char *topic, uint16 u, uint16 undef)
+void MQTTPublisher::publishIfDefined(const char *topic, uint16_t u, uint16_t undef)
 {
   if (u != undef)
   {
