@@ -104,31 +104,8 @@ namespace PIN
 class DIFF
 {
 public:
-  // time delta with overflow support
-  static unsigned long timeDiff(unsigned long newTime, unsigned long oldTime)
-  {
-    if (newTime >= oldTime)
-    {
-      return newTime - oldTime;
-    }
-    else
-    {
-      return ULONG_MAX - oldTime + newTime + 1;
-    }
-  };
-
-  // unsigned int delta with overflow support
-  static unsigned int intDiff(unsigned int newVal, unsigned int oldVal)
-  {
-    if (newVal >= oldVal)
-    {
-      return newVal - oldVal;
-    }
-    else
-    {
-      return UINT_MAX - oldVal + newVal + 1;
-    }
-  };
+  static unsigned long timeDiff(unsigned long newTime, unsigned long oldTime);
+  static unsigned int intDiff(unsigned int newVal, unsigned int oldVal);
 };
 
 #endif /* COMMON_H */
