@@ -299,8 +299,6 @@ void SBH20IO::setDesiredWaterTempCelsius(int temp)
   {
     if (isPowerOn() == true && state.error == ERROR::NONE)
     {
-      // try to get initial temp
-      WiFi.forceSleepBegin();
       int setTemp = getDesiredWaterTempCelsius();
       bool modifying = false;
       if (setTemp == UNDEF::USHORT)
@@ -324,7 +322,6 @@ void SBH20IO::setDesiredWaterTempCelsius(int temp)
         {
           // error, abort
           DEBUG_MSG("\naborted\n");
-          WiFi.forceSleepWake();
           delay(1);
           return;
         }
@@ -358,7 +355,6 @@ void SBH20IO::setDesiredWaterTempCelsius(int temp)
         }
         modifying = true;
       }
-      WiFi.forceSleepWake();
       delay(1);
     }
   }
@@ -375,8 +371,6 @@ void SBH20IO::setDesiredWaterTempCelsius(int temp)
  */
 bool SBH20IO::pressButton(volatile unsigned int &buttonPressCount)
 {
-  WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
-  // WiFi.forceSleepBegin();
   waitBuzzerOff();
   unsigned int tries = BUTTON::ACK_TIMEOUT / BUTTON::ACK_CHECK_PERIOD;
   buttonPressCount = BUTTON::PRESS_COUNT;
@@ -385,9 +379,6 @@ bool SBH20IO::pressButton(volatile unsigned int &buttonPressCount)
     delay(BUTTON::ACK_CHECK_PERIOD);
     tries--;
   }
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  // WiFi.forceSleepWake();
-  // delay(1);
 
   return tries;
 }
