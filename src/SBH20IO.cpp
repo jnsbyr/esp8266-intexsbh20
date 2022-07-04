@@ -919,7 +919,7 @@ inline void SBH20IO::decodeButton()
   {
     // delay around 5 µs relative to rising edge of latch signal before pulsing
     // pulse should be around 2 µs and must be completed before next falling edge of clock
-#if F_CPU == 160000000L
+#if F_CPU >= 160000000L
     delayMicroseconds(1);
     pinMode(PIN::DATA, OUTPUT);
     delayMicroseconds(3);
