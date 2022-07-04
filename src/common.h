@@ -101,30 +101,34 @@ namespace PIN
 #define DEBUG_MSG(...)
 #endif
 
-// time delta with overflow support
-static unsigned long timeDiff(unsigned long newTime, unsigned long oldTime)
+class DIFF
 {
-  if (newTime >= oldTime)
+public:
+  // time delta with overflow support
+  static unsigned long timeDiff(unsigned long newTime, unsigned long oldTime)
   {
-    return newTime - oldTime;
-  }
-  else
-  {
-    return ULONG_MAX - oldTime + newTime + 1;
-  }
-}
+    if (newTime >= oldTime)
+    {
+      return newTime - oldTime;
+    }
+    else
+    {
+      return ULONG_MAX - oldTime + newTime + 1;
+    }
+  };
 
-// unsigned int delta with overflow support
-static unsigned long diff(unsigned int newVal, unsigned int oldVal)
-{
-  if (newVal >= oldVal)
+  // unsigned int delta with overflow support
+  static unsigned int intDiff(unsigned int newVal, unsigned int oldVal)
   {
-    return newVal - oldVal;
-  }
-  else
-  {
-    return UINT_MAX - oldVal + newVal + 1;
-  }
-}
+    if (newVal >= oldVal)
+    {
+      return newVal - oldVal;
+    }
+    else
+    {
+      return UINT_MAX - oldVal + newVal + 1;
+    }
+  };
+};
 
 #endif /* COMMON_H */

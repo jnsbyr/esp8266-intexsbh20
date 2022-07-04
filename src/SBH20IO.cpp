@@ -186,7 +186,7 @@ void SBH20IO::loop()
     state.online = true;
     state.stateUpdated = false;
   }
-  else if (timeDiff(now, lastStateUpdateTime) > CYCLE::RECEIVE_TIMEOUT)
+  else if (DIFF::timeDiff(now, lastStateUpdateTime) > CYCLE::RECEIVE_TIMEOUT)
   {
     state.online = false;
   }
@@ -676,7 +676,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeDisplay()
         // DEBUG_MSG("O");
         if (isrState.isDisplayBlinking)
         {
-          if (diff(state.frameCounter, isrState.lastBlankDisplayFrameCounter) > BLINK::STOPPED_FRAMES)
+          if (DIFF::intDiff(state.frameCounter, isrState.lastBlankDisplayFrameCounter) > BLINK::STOPPED_FRAMES)
           {
             // blinking is over, clear desired temp
             // DEBUG_MSG("b");
@@ -702,7 +702,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeDisplay()
                 isrState.stableBlinkingWaterTempCount++;
                 // DEBUG_MSG(" DS%d ", isrState.stableDesiredWaterTempCount);
               }
-              else if (diff(state.frameCounter, isrState.lastBlankDisplayFrameCounter) < BLINK::TEMP_FRAMES)
+              else if (DIFF::intDiff(state.frameCounter, isrState.lastBlankDisplayFrameCounter) < BLINK::TEMP_FRAMES)
               {
                 // blinking temp has changed (is read after a blank screen and set at next black screen)
                 // DEBUG_MSG(" DC%x ", isrState.displayValue);

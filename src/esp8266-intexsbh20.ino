@@ -115,7 +115,7 @@ void setup()
 
       ready = true;
     }
-    catch (std::runtime_error re)
+    catch (std::runtime_error const &re)
     {
       Serial.println(re.what());
     }
@@ -173,7 +173,7 @@ void loop()
       // WiFi disconnected
       disconnectTime = now;
     }
-    else if (timeDiff(now, disconnectTime) > CONFIG::WIFI_MAX_DISCONNECT_DURATION)
+    else if (DIFF::timeDiff(now, disconnectTime) > CONFIG::WIFI_MAX_DISCONNECT_DURATION)
     {
       // WiFi disconnected too long, restart ESP
       DEBUG_MSG("restarting ... (no WiFi connection for several minutes)\n");

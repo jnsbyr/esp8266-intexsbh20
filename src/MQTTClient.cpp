@@ -82,7 +82,7 @@ void MQTTClient::setup(const char *mqttServer, const char *mqttUsername, const c
 
 void MQTTClient::reconnect()
 {
-  if (!mqttClient.connected() && timeDiff(now, lastConnectTime) > RECONNECT_DELAY)
+  if (!mqttClient.connected() && DIFF::timeDiff(now, lastConnectTime) > RECONNECT_DELAY)
   {
     // not connected, try to reconnect
     Serial.print("trying to connect to MQTT server ... ");

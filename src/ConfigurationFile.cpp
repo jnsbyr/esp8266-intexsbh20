@@ -29,14 +29,13 @@
 #include <LittleFS.h>
 #include <stdexcept>
 
-
 /**
  * load JSON config file into memory
  *
  * @param fileName name of file
  * @return true on success
  */
-bool ConfigurationFile::load(const char* fileName)
+bool ConfigurationFile::load(const char *fileName)
 {
   bool success = true;
 
@@ -70,7 +69,7 @@ bool ConfigurationFile::load(const char* fileName)
       configFile.close();
       Serial.printf_P(PSTR("config file loaded successfully (has %d entries)\n"), configDoc.size());
     }
-    catch (std::runtime_error re)
+    catch (std::runtime_error const &re)
     {
       Serial.println(re.what());
       success = false;
@@ -90,7 +89,7 @@ bool ConfigurationFile::load(const char* fileName)
  * @param tag
  * @return true if config tag exists
  */
-bool ConfigurationFile::exists(const char* tag) const
+bool ConfigurationFile::exists(const char *tag) const
 {
   return configDoc.containsKey(tag);
 }
@@ -103,7 +102,7 @@ bool ConfigurationFile::exists(const char* tag) const
  *
  * @throws std::runtime_error if config tag is unknown
  */
-const char* ConfigurationFile::get(const char* tag)
+const char *ConfigurationFile::get(const char *tag)
 {
   if (configDoc.containsKey(tag))
   {
