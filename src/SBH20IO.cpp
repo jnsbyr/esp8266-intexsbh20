@@ -135,7 +135,7 @@ namespace ERROR
   const uint16 TEMP_SENSOR = (DIGIT::LET_E << 8) | (9 << 4) | 9;
   const uint16 HEATING_ABORTED = (DIGIT::LET_E << 8) | (DIGIT::LET_N << 4) | DIGIT::LET_D;
 
-  const uint16 VALUES[] = {NO_WATER_FLOW, WATER_TEMP_LOW, WATER_TEMP_HIGH, WATER_TEMP_HIGH, SYSTEM, DRY_FIRE_PROTECT, TEMP_SENSOR, HEATING_ABORTED};
+  const uint16 VALUES[] = {NO_WATER_FLOW, WATER_TEMP_LOW, WATER_TEMP_HIGH, SYSTEM, DRY_FIRE_PROTECT, TEMP_SENSOR, HEATING_ABORTED};
   const unsigned int COUNT = sizeof(VALUES) / sizeof(uint16);
 
   // human readable error on display
