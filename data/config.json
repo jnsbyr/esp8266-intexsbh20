@@ -5,6 +5,6 @@
  "mqttUser":       "leave blank if you don't have authentication",
  "mqttPassword":   "leave blank if you don't have authentication",
  "mqttRetain":     "no",
- "firmwareURL":    "http://192.168.0.1/firmware/esp8266-intexsbh20.bin",
+ "firmwareURL":    "https://homeassistant.local:8123/local/esp8266-intexsbh20.bin",
  "errorLanguage":  "EN"
 }
