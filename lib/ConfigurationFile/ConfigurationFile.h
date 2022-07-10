@@ -29,17 +29,16 @@
 
 #include <ArduinoJson.h>
 
-
 class ConfigurationFile
 {
 public:
-  bool load(const char* fileName);
-  bool exists(const char* tag) const;
-  const char* get(const char* tag);
+  bool load(const char *fileName);
+  bool exists(const char *tag) const;
+  const char *get(const char *tag);
 
 private:
-  static const unsigned int CONFIG_BUFFER_SIZE     = 256; // [bytes]
-  static const unsigned int EXCEPTION_MESSAGE_SIZE =  80; // [bytes]
+  static const unsigned int CONFIG_BUFFER_SIZE = 512;    // [bytes]
+  static const unsigned int EXCEPTION_MESSAGE_SIZE = 80; // [bytes]
 
 private:
   ArduinoJson::StaticJsonDocument<CONFIG_BUFFER_SIZE> configDoc;
@@ -47,4 +46,3 @@ private:
 };
 
 #endif /* CONFIGURATION_FILE_H */
-

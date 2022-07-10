@@ -35,30 +35,30 @@
 namespace CONFIG
 {
   const char POOL_MODEL_NAME[] = "Intex PureSpa SB-H20";
-  const char WIFI_VERSION[]    = "1.0.2.0"; // 12.06.2022
+  const char WIFI_VERSION[] = "1.0.2.0"; // 12.06.2022
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot
 
   // MQTT publish rates
-  const unsigned int  POOL_UPDATE_PERIOD           =    500; // [ms]
-  const unsigned int  WIFI_UPDATE_PERIOD           =  30000; // [ms] 30 sec
-  const unsigned int  FORCED_STATE_UPDATE_PERIOD   =  10000; // [ms] 10 sec
+  const unsigned int POOL_UPDATE_PERIOD = 500;           // [ms]
+  const unsigned int WIFI_UPDATE_PERIOD = 30000;         // [ms] 30 sec
+  const unsigned int FORCED_STATE_UPDATE_PERIOD = 10000; // [ms] 10 sec
 }
 
 // Config File Tags
 namespace CONFIG_TAG
 {
-  const char FILENAME[]        = "config.json";
+  const char FILENAME[] = "config.json";
 
-  const char WIFI_SSID[]       = "wifiSSID";
+  const char WIFI_SSID[] = "wifiSSID";
   const char WIFI_PASSPHRASE[] = "wifiPassphrase";
-  const char WIFI_OTA_URL[]    = "firmwareURL";
+  const char WIFI_OTA_URL[] = "firmwareURL";
 
-  const char MQTT_SERVER[]     = "mqttServer";
-  const char MQTT_USER[]       = "mqttUser";
-  const char MQTT_PASSWORD[]   = "mqttPassword";
-  const char MQTT_RETAIN[]     = "mqttRetain";
+  const char MQTT_SERVER[] = "mqttServer";
+  const char MQTT_USER[] = "mqttUser";
+  const char MQTT_PASSWORD[] = "mqttPassword";
+  const char MQTT_RETAIN[] = "mqttRetain";
   const char MQTT_ERROR_LANG[] = "errorLanguage";
 };
 
@@ -66,47 +66,49 @@ namespace CONFIG_TAG
 namespace MQTT_TOPIC
 {
   // publish
-  const char BUBBLE[]     = "pool/bubble";
-  const char ERROR[]      = "pool/error";
-  const char FILTER[]     = "pool/filter";
-  const char HEATER[]     = "pool/heater";
-  const char MODEL[]      = "pool/model";
-  const char POWER[]      = "pool/power";
-  const char WATER_ACT[]  = "pool/water/tempAct";
-  const char WATER_SET[]  = "pool/water/tempSet";
-  const char VERSION[]    = "wifi/version";
-  const char IP[]         = "wifi/ip";
-  const char RSSI[]       = "wifi/rssi";
-  const char WIFI_TEMP[]  = "wifi/temp";
-  const char STATE[]      = "wifi/state";
-  const char OTA[]        = "wifi/update";
+  const char BUBBLE[] = "pool/bubble";
+  const char ERROR[] = "pool/error";
+  const char FILTER[] = "pool/filter";
+  const char HEATER[] = "pool/heater";
+  const char MODEL[] = "pool/model";
+  const char POWER[] = "pool/power";
+  const char WATER_ACT[] = "pool/water/tempAct";
+  const char WATER_SET[] = "pool/water/tempSet";
+  const char VERSION[] = "wifi/version";
+  const char IP[] = "wifi/ip";
+  const char RSSI[] = "wifi/rssi";
+  const char WIFI_TEMP[] = "wifi/temp";
+  const char STATE[] = "wifi/state";
+  const char OTA[] = "wifi/update";
 
   // subscribe
   const char CMD_BUBBLE[] = "pool/command/bubble";
   const char CMD_FILTER[] = "pool/command/filter";
   const char CMD_HEATER[] = "pool/command/heater";
-  const char CMD_POWER[]  = "pool/command/power";
-  const char CMD_WATER[]  = "pool/command/water/tempSet";
-  const char CMD_OTA[]    = "wifi/command/update";
+  const char CMD_POWER[] = "pool/command/power";
+  const char CMD_WATER[] = "pool/command/water/tempSet";
+  const char CMD_OTA[] = "wifi/command/update";
 }
 
 // Languages
 enum class LANG
 {
-  CODE = 0, EN = 1, DE = 2
+  CODE = 0,
+  EN = 1,
+  DE = 2
 };
 
 // ESP8266 pins
 namespace PIN
 {
   const uint8 CLOCK = D5;
-  const uint8 DATA  = D6;
+  const uint8 DATA = D6;
   const uint8 LATCH = D7;
 }
 
 // serial debugging
 #ifdef SERIAL_DEBUG
-#define DEBUG_MSG(...) Serial.printf( __VA_ARGS__ )
+#define DEBUG_MSG(...) Serial.printf(__VA_ARGS__)
 #else
 #define DEBUG_MSG(...)
 #endif

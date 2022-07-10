@@ -26,28 +26,7 @@
  *
  */
 
-/**
- * BUILD ENVIRONMENT:
- *
- * IDE: Arduino 1.8.13
- *
- * Libraries:
- *
- * - Arduino Core for ESP8266 2.7.4
- * - ArduinoJson 6.17.2
- * - PubSubClient (MQTT) 2.8.0
- *
- * Board: Wemos D1 mini (ESP8266)
- *
- * CPU:        160 MHz
- * Flash:      4M (FS: 1M, OTA: 1M)
- * Debug:      disabled
- * IwIP:       v2 lower memory
- * VTables:    IRAM
- * Exceptions: enabled
- *
- */
-
+#include <Arduino.h>
 #include "NTCThermometer.h"
 #include "OTAUpdate.h"
 #include "SBH20IO.h"
@@ -55,7 +34,6 @@
 #include "MQTTClient.h"
 #include "MQTTPublisher.h"
 #include "common.h"
-
 
 ConfigurationFile config;
 NTCThermometer thermometer;
@@ -69,7 +47,6 @@ MQTTPublisher mqttPublisher(mqttClient, poolIO, thermometer);
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
 bool initialized = false;
-
 
 /**
  *  Arduino setup function
@@ -94,31 +71,37 @@ void setup()
       WiFi.begin(config.get(CONFIG_TAG::WIFI_SSID), config.get(CONFIG_TAG::WIFI_PASSPHRASE));
 
       // init MQTT
-      bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN)? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
+      bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN) ? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
       mqttPublisher.setRetainAll(retainAll);
-      
+
       mqttClient.addMetadata(MQTT_TOPIC::MODEL, CONFIG::POOL_MODEL_NAME);
       mqttClient.addMetadata(MQTT_TOPIC::VERSION, CONFIG::WIFI_VERSION);
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void { poolIO.setBubbleOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void { poolIO.setFilterOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void { poolIO.setHeaterOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER,  [](bool b) -> void { poolIO.setPowerOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { poolIO.setDesiredWaterTempCelsius(i); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void
+                               { poolIO.setBubbleOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void
+                               { poolIO.setFilterOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void
+                               { poolIO.setHeaterOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER, [](bool b) -> void
+                               { poolIO.setPowerOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER, [](int i) -> void
+                               { poolIO.setDesiredWaterTempCelsius(i); });
       if (config.exists(CONFIG_TAG::WIFI_OTA_URL))
       {
         // enable OTA update if URL is defined in config
-        mqttClient.addSubscriber(MQTT_TOPIC::CMD_OTA,  [](bool b) -> void { if (b) otaUpdate.start(config.get(CONFIG_TAG::WIFI_OTA_URL), mqttClient); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_OTA, [](bool b) -> void
+                                 { if (b) otaUpdate.start(config.get(CONFIG_TAG::WIFI_OTA_URL), mqttClient); });
       }
       if (config.exists(CONFIG_TAG::MQTT_ERROR_LANG))
       {
         // set language of error message if defined in config
         String lang = config.get(CONFIG_TAG::MQTT_ERROR_LANG);
-        language = lang == "EN"? LANG::EN : (lang == "DE"? LANG::DE : LANG::CODE);
+        language = lang == "EN" ? LANG::EN : (lang == "DE" ? LANG::DE : LANG::CODE);
       }
       mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
-      thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
+      thermometer.setup(22000, 3.33f, 320.f / 100.f); // measured: 21990, 3.327f, 319.f/99.6f
 
       // enable hardware watchdog (8.3 s) by disabling software watchdog
       ESP.wdtDisable();

@@ -28,11 +28,10 @@
 
 #include "common.h"
 
-
 /**
  * MQTT subscription received callback
  */
-void MQTTClient::subscriptionUpdate(char* topic, byte* message, unsigned int length)
+void MQTTClient::subscriptionUpdate(char *topic, byte *message, unsigned int length)
 {
   message[length] = '\0';
 
@@ -41,7 +40,7 @@ void MQTTClient::subscriptionUpdate(char* topic, byte* message, unsigned int len
   if (i != boolSubscriber.end())
   {
     // decode payload as bool (on/off) and pass to subscriber
-    bool on = strcmp("on", (char*)message) == 0;
+    bool on = strcmp("on", (char *)message) == 0;
     DEBUG_MSG("set %s: %d\n", topic, on);
     i->second(on);
   }
@@ -51,7 +50,7 @@ void MQTTClient::subscriptionUpdate(char* topic, byte* message, unsigned int len
     if (i != intSubscriber.end())
     {
       // decode payload as int and pass to subscriber
-      int value = atoi((char*)message);
+      int value = atoi((char *)message);
       DEBUG_MSG("set %s: %d\n", topic, value);
       i->second(value);
     }
@@ -69,7 +68,7 @@ void MQTTClient::subscriptionUpdate(char* topic, byte* message, unsigned int len
   publications.erase(willTopic);
 }
 
-void MQTTClient::setup(const char* mqttServer,const char* mqttUsername, const char* mqttPassword, const char* cid, const char* wt, const char* wm)
+void MQTTClient::setup(const char *mqttServer, const char *mqttUsername, const char *mqttPassword, const char *cid, const char *wt, const char *wm)
 {
   mqttuser = mqttUsername;
   mqttpw = mqttPassword;
@@ -95,22 +94,24 @@ void MQTTClient::reconnect()
       // publish metadata
       if (!lastConnectTime)
       {
-        for (auto m: metadata)
+        for (auto m : metadata)
         {
           mqttClient.publish(m.first.c_str(), m.second.c_str(), true);
         }
       }
 
       // resubscribe
-      for (auto s: boolSubscriber)
+      for (auto s : boolSubscriber)
       {
         mqttClient.subscribe(s.first.c_str());
       }
-      for (auto s: intSubscriber)
+      for (auto s : intSubscriber)
       {
         mqttClient.subscribe(s.first.c_str());
       }
-    } else {
+    }
+    else
+    {
       Serial.printf("failed, rc=%d\n", mqttClient.state());
     }
     lastConnectTime = now;
@@ -122,7 +123,8 @@ void MQTTClient::loop()
   now = millis();
 
   // reconnect
-  if (!mqttClient.connected()) {
+  if (!mqttClient.connected())
+  {
     reconnect();
   }
 
@@ -130,17 +132,17 @@ void MQTTClient::loop()
   mqttClient.loop();
 }
 
-void MQTTClient::addMetadata(const char* topic, const char* message)
+void MQTTClient::addMetadata(const char *topic, const char *message)
 {
   metadata[topic] = message;
 }
 
-void MQTTClient::addSubscriber(const char* topic, void (*setter)(bool value))
+void MQTTClient::addSubscriber(const char *topic, void (*setter)(bool value))
 {
   boolSubscriber[topic] = setter;
 }
 
-void MQTTClient::addSubscriber(const char* topic, void (*setter)(int value))
+void MQTTClient::addSubscriber(const char *topic, void (*setter)(int value))
 {
   intSubscriber[topic] = setter;
 }
@@ -159,7 +161,7 @@ bool MQTTClient::isConnected()
  * @param force
  * @return true if published
  */
-bool MQTTClient::publish(const char* topic, const String& message, bool retain, bool force)
+bool MQTTClient::publish(const char *topic, const String &message, bool retain, bool force)
 {
   if (lastConnectTime)
   {
@@ -189,5 +191,9 @@ bool MQTTClient::publish(const char* topic, const String& message, bool retain, 
     {
       return false;
     }
+  }
+  else
+  {
+    return false;
   }
 }
