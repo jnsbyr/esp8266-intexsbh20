@@ -38,7 +38,7 @@ public:
   const char* get(const char* tag);
 
 private:
-  static const unsigned int CONFIG_BUFFER_SIZE     = 256; // [bytes]
+  static const unsigned int CONFIG_BUFFER_SIZE     = 512; // [bytes]
   static const unsigned int EXCEPTION_MESSAGE_SIZE =  80; // [bytes]
 
 private:
