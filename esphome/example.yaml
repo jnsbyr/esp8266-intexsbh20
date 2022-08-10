@@ -1,0 +1,26 @@
+esphome:
+  platformio_options:
+    board_build.f_cpu: 160000000L
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+climate:
+
+switch:
+
+text_sensor:
+
+intexsbh20:
+  climate:
+    name: Intex Whirlpool Climate Control
+  power:
+    name: Intex Whirlpool Power Switch
+  filter:
+    name: Intex Whirlpool Filter Switch
+  bubble:
+    name: Intex Whirlpool Bubble Switch
+  error_text:
+    name: Intex Whirlpool Error Message
