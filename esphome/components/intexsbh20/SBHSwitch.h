@@ -37,7 +37,11 @@ public:
 		else
 		{
 			ESP_LOGE("SBHSwitch", "Unknown switch type: %s", type_);
+			return;
 		}
+
+		if (get_parent()->sbh()->isOnline())
+			publish_state(state);
 	}
 private:
 	const char* type_ = nullptr;

@@ -154,6 +154,12 @@ public:
   int getActWaterTempCelsius() const;
   int getDesiredWaterTempCelsius() const;
 
+  // Presses the down button to force the whirlpool to display the target temp.
+  // Use wisely - only call if getDesiredWaterTempCelsius() returns UNDEF::USHORT,
+  // and setDesiredWaterTempCelsius() hasn't just been called,
+  // or else it could actually modify the target temperature.
+  void forceGetDesiredWaterTempCelsius() { changeWaterTemp(-1); }
+
   uint8 isBubbleOn() const;
   uint8 isFilterOn() const;
   uint8 isHeaterOn() const;

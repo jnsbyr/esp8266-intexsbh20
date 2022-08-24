@@ -8,14 +8,32 @@ void SBHClimate::update()
 	SBH20IO* sbh = get_parent()->sbh();
 
 	if (!sbh->isHeaterOn())
+	{
 		this->action = esphome::climate::CLIMATE_ACTION_OFF;
+		this->mode = esphome::climate::CLIMATE_MODE_OFF;
+	}
 	else if (sbh->isHeaterStandby())
+	{
 		this->action = esphome::climate::CLIMATE_ACTION_IDLE;
+		this->mode = esphome::climate::CLIMATE_MODE_HEAT;
+	}
 	else
+	{
 		this->action = esphome::climate::CLIMATE_ACTION_HEATING;
+		this->mode = esphome::climate::CLIMATE_MODE_HEAT;
+	}
 
 	this->current_temperature = sbh->getActWaterTempCelsius();
-	this->target_temperature = sbh->getDesiredWaterTempCelsius();
+
+	int targetTemp = sbh->getDesiredWaterTempCelsius();
+
+	this->target_temperature = (targetTemp != SBH20IO::UNDEF::USHORT) ? targetTemp : SBH20IO::WATER_TEMP::SET_MIN;
+
+	if (targetTemp == SBH20IO::UNDEF::USHORT)
+	{
+		ESP_LOGD("SBHClimate", "Target temp is undef, pressing the down button...");
+		sbh->forceGetDesiredWaterTempCelsius(); // we'll learn the real target temp in near future...
+	}
 
 	publish_state();
 }
@@ -39,8 +57,8 @@ esphome::climate::ClimateTraits SBHClimate::traits()
 {
 	esphome::climate::ClimateTraits rv;
 
-	rv.set_visual_min_temperature(10);
-	rv.set_visual_max_temperature(40);
+	rv.set_visual_min_temperature(SBH20IO::WATER_TEMP::SET_MIN);
+	rv.set_visual_max_temperature(SBH20IO::WATER_TEMP::SET_MAX);
 	rv.set_visual_temperature_step(1);
 	rv.set_supports_current_temperature(true);
 	rv.set_supports_action(true);

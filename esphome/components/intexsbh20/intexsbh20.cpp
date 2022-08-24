@@ -53,5 +53,4 @@ void IntexSBH20::update()
 		climate_->update();
 }
 
-
 }}

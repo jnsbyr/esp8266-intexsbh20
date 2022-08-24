@@ -48,16 +48,19 @@ async def to_code(config):
 	if CONF_POWER in config:
 		sw = cg.new_Pvariable(config[CONF_POWER][CONF_ID])
 		await switch.register_switch(sw, config[CONF_POWER])
+		cg.add(sw.set_type("power"))
 		cg.add(var.set_switch_power(sw))
 
 	if CONF_FILTER in config:
 		sw = cg.new_Pvariable(config[CONF_FILTER][CONF_ID])
 		await switch.register_switch(sw, config[CONF_FILTER])
+		cg.add(sw.set_type("filter"))
 		cg.add(var.set_switch_filter(sw))
 
 	if CONF_BUBBLE in config:
 		sw = cg.new_Pvariable(config[CONF_BUBBLE][CONF_ID])
 		await switch.register_switch(sw, config[CONF_BUBBLE])
+		cg.add(sw.set_type("bubble"))
 		cg.add(var.set_switch_bubble(sw))
 
 	if CONF_ERROR_TEXT in config:
