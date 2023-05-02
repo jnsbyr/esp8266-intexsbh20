@@ -524,6 +524,7 @@ bool SBH20IO::changeWaterTemp(int up)
       return false;
     }
   }
+  return false;
 }
 
 uint16 SBH20IO::convertDisplayToCelsius(uint16 value) const
