@@ -113,5 +113,6 @@ const char* ConfigurationFile::get(const char* tag)
   {
     snprintf_P(exceptionMessage, EXCEPTION_MESSAGE_SIZE, PSTR("required entry '%s' not found in config file"), tag);
     throw std::runtime_error(exceptionMessage);
+    return NULL;
   }
 }
