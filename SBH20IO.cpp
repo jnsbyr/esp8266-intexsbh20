@@ -523,6 +523,7 @@ bool SBH20IO::changeWaterTemp(int up)
       DEBUG_MSG("\ncWT fail");
     }
   }
+  
   return false;
 }
 
