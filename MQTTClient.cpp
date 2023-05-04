@@ -185,10 +185,7 @@ bool MQTTClient::publish(const char* topic, const String& message, bool retain, 
       }
       return published;
     }
-    else
-    {
-      return false;
-    }
   }
+  
   return false;
 }
