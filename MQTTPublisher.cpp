@@ -1,5 +1,5 @@
 /*
- * project:  Intex PureSpa SB-H20 WiFi Controller
+ * project:  Intex PureSpa WiFi Controller
  *
  * file:     MQTTPublisher.cpp
  *
@@ -27,14 +27,14 @@
 #include "MQTTPublisher.h"
 
 #include "MQTTClient.h"
-#include "SBH20IO.h"
+#include "PureSpaIO.h"
 #include "NTCThermometer.h"
 #include "common.h"
 
 
-MQTTPublisher::MQTTPublisher(MQTTClient& mqttClient, SBH20IO& poolIO, NTCThermometer& thermometer) :
+MQTTPublisher::MQTTPublisher(MQTTClient& mqttClient, PureSpaIO& pureSpaIO, NTCThermometer& thermometer) :
   mqttClient(mqttClient),
-  poolIO(poolIO),
+  pureSpaIO(pureSpaIO),
   thermometer(thermometer),
   retainAll(false)
 {
@@ -122,26 +122,32 @@ void MQTTPublisher::loop()
       forcedStateUpdate = true;
     }
 
-    if (poolIO.isOnline())
+    if (pureSpaIO.isOnline())
     {
-      publishIfDefined(MQTT_TOPIC::BUBBLE, poolIO.isBubbleOn(), SBH20IO::UNDEF::BOOL);
-      publishIfDefined(MQTT_TOPIC::FILTER, poolIO.isFilterOn(), SBH20IO::UNDEF::BOOL);
-      publishIfDefined(MQTT_TOPIC::POWER,  poolIO.isPowerOn(),  SBH20IO::UNDEF::BOOL);
+      publishIfDefined(MQTT_TOPIC::BUBBLE, pureSpaIO.isBubbleOn(), PureSpaIO::UNDEF::BOOL);
+      publishIfDefined(MQTT_TOPIC::FILTER, pureSpaIO.isFilterOn(), PureSpaIO::UNDEF::BOOL);
+      publishIfDefined(MQTT_TOPIC::POWER,  pureSpaIO.isPowerOn(),  PureSpaIO::UNDEF::BOOL);
 
-      bool b = poolIO.isHeaterOn();
-      if (b != SBH20IO::UNDEF::BOOL)
+      if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
       {
-        mqttClient.publish(MQTT_TOPIC::HEATER, b? (poolIO.isHeaterStandby()? "standby" : "on") : "off", retainAll);
+        publishIfDefined(MQTT_TOPIC::FILTER, pureSpaIO.isDisinfectionOn(), PureSpaIO::UNDEF::BOOL);
+        publishIfDefined(MQTT_TOPIC::BUBBLE, pureSpaIO.isJetOn(), PureSpaIO::UNDEF::BOOL);
       }
 
-      publishIfDefined(MQTT_TOPIC::WATER_ACT, poolIO.getActWaterTempCelsius(),     (int)SBH20IO::UNDEF::USHORT);
-      publishIfDefined(MQTT_TOPIC::WATER_SET, poolIO.getDesiredWaterTempCelsius(), (int)SBH20IO::UNDEF::USHORT);
+      bool b = pureSpaIO.isHeaterOn();
+      if (b != PureSpaIO::UNDEF::BOOL)
+      {
+        mqttClient.publish(MQTT_TOPIC::HEATER, b? (pureSpaIO.isHeaterStandby()? "standby" : "on") : "off", retainAll);
+      }
+
+      publishIfDefined(MQTT_TOPIC::WATER_ACT, pureSpaIO.getActWaterTempCelsius(),     (int)PureSpaIO::UNDEF::USHORT);
+      publishIfDefined(MQTT_TOPIC::WATER_SET, pureSpaIO.getDesiredWaterTempCelsius(), (int)PureSpaIO::UNDEF::USHORT);
 
 #ifdef SERIAL_DEBUG
-      publishIfDefined("pool/telegram/led", poolIO.getRawLedValue(), SBH20IO::UNDEF::USHORT);
+      publishIfDefined("pool/telegram/led", pureSpaIO.getRawLedValue(), PureSpaIO::UNDEF::USHORT);
 #endif
 
-      unsigned int errorVal = poolIO.getErrorValue();
+      unsigned int errorVal = pureSpaIO.getErrorValue();
       if (errorVal == 0)
       {
         mqttClient.publish(MQTT_TOPIC::STATE, "online", retainAll, forcedStateUpdate);
@@ -150,7 +156,7 @@ void MQTTPublisher::loop()
       {
         mqttClient.publish(MQTT_TOPIC::STATE, "error", retainAll, forcedStateUpdate);
       }
-      mqttClient.publish(MQTT_TOPIC::ERROR, poolIO.getErrorMessage(errorVal).c_str(), retainAll);
+      mqttClient.publish(MQTT_TOPIC::ERROR, pureSpaIO.getErrorMessage(errorVal).c_str(), retainAll);
     }
     else
     {

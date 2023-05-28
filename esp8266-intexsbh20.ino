@@ -1,5 +1,5 @@
 /*
- * project:  Intex PureSpa SB-H20 WiFi Controller
+ * project:  Intex PureSpa WiFi Controller
  *
  * file:     esp8266-intexsbh20.ino
  *
@@ -9,7 +9,7 @@
  * Copyright (C) 2021 Jens B.
  *
  *
- * Receive data handling of class SBH20IO based on code from:
+ * Receive data handling of class PureSpaIO based on code from:
  *
  * DIYSCIP <https://github.com/yorffoeg/diyscip> (c) by Geoffroy HUBERT - yorffoeg@gmail.com
  *
@@ -34,8 +34,8 @@
  * Libraries:
  *
  * - Arduino Core for ESP8266 2.7.4
- * - ArduinoJson 6.17.2
- * - PubSubClient (MQTT) 2.8.0
+ * - ArduinoJson 6.19.4
+ * - PubSubClient (MQTT) 2.8
  *
  * Board: Wemos D1 mini (ESP8266)
  *
@@ -48,23 +48,23 @@
  *
  */
 
-#include "NTCThermometer.h"
-#include "OTAUpdate.h"
-#include "SBH20IO.h"
+#include "common.h"
 #include "ConfigurationFile.h"
 #include "MQTTClient.h"
 #include "MQTTPublisher.h"
-#include "common.h"
+#include "NTCThermometer.h"
+#include "OTAUpdate.h"
+#include "PureSpaIO.h"
 
+#include <stdexcept>
 
 ConfigurationFile config;
 NTCThermometer thermometer;
 OTAUpdate otaUpdate;
-
-SBH20IO poolIO;
+PureSpaIO pureSpaIO;
 
 MQTTClient mqttClient;
-MQTTPublisher mqttPublisher(mqttClient, poolIO, thermometer);
+MQTTPublisher mqttPublisher(mqttClient, pureSpaIO, thermometer);
 
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
@@ -79,7 +79,7 @@ void setup()
   Serial.begin(74880); // 74880 Baud is the default data rate of the ESP8266 bootloader
 
   // print versions
-  Serial.printf_P(PSTR("SB-H20 WiFi Controller %s\n"), CONFIG::WIFI_VERSION);
+  Serial.printf_P(PSTR("%s MQTT WiFi Controller %s\n"), pureSpaIO.getModelName(), CONFIG::WIFI_VERSION);
   Serial.printf_P(PSTR("build with Arduino Core for ESP8266 %s\n"), ESP.getCoreVersion().c_str());
   Serial.printf_P(PSTR("based on Espressif NONOS SDK %s\n"), ESP.getSdkVersion());
 
@@ -96,26 +96,36 @@ void setup()
       // init MQTT
       bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN)? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
       mqttPublisher.setRetainAll(retainAll);
-      
-      mqttClient.addMetadata(MQTT_TOPIC::MODEL, CONFIG::POOL_MODEL_NAME);
+
+      mqttClient.addMetadata(MQTT_TOPIC::MODEL, pureSpaIO.getModelName());
       mqttClient.addMetadata(MQTT_TOPIC::VERSION, CONFIG::WIFI_VERSION);
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void { poolIO.setBubbleOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void { poolIO.setFilterOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void { poolIO.setHeaterOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER,  [](bool b) -> void { poolIO.setPowerOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { poolIO.setDesiredWaterTempCelsius(i); });
+
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void { pureSpaIO.setBubbleOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void { pureSpaIO.setFilterOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void { pureSpaIO.setHeaterOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER,  [](bool b) -> void { pureSpaIO.setPowerOn(b); });
+      mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { pureSpaIO.setDesiredWaterTempCelsius(i); });
+      if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
+      {
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_DISINFECTION, [](bool b) -> void { pureSpaIO.setDisinfectionOn(b); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_JET,          [](bool b) -> void { pureSpaIO.setJetOn(b); });
+      }
+
+      // enable OTA update if URL is defined in config
       if (config.exists(CONFIG_TAG::WIFI_OTA_URL))
       {
-        // enable OTA update if URL is defined in config
         mqttClient.addSubscriber(MQTT_TOPIC::CMD_OTA,  [](bool b) -> void { if (b) otaUpdate.start(config.get(CONFIG_TAG::WIFI_OTA_URL), mqttClient); });
       }
+
+      // set language of error message if defined in config
       if (config.exists(CONFIG_TAG::MQTT_ERROR_LANG))
       {
-        // set language of error message if defined in config
         String lang = config.get(CONFIG_TAG::MQTT_ERROR_LANG);
         language = lang == "EN"? LANG::EN : (lang == "DE"? LANG::DE : LANG::CODE);
       }
-      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
+
+      // init MQTT client
+      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
@@ -159,7 +169,7 @@ void loop()
       mqttClient.addMetadata(MQTT_TOPIC::IP, WiFi.localIP().toString().c_str());
 
       // init whirlpool I/O after first WiFi connect
-      poolIO.setup(language);
+      pureSpaIO.setup(language);
       initialized = true;
     }
     else
@@ -169,7 +179,7 @@ void loop()
       mqttPublisher.loop();
 
       // update pool
-      poolIO.loop();
+      pureSpaIO.loop();
 
       // force idle
       delay(100);

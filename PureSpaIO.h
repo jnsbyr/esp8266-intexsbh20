@@ -1,7 +1,7 @@
 /*
- * project:  Intex PureSpa SB-H20 WiFi Controller
+ * project:  Intex PureSpa WiFi Controller
  *
- * file:     SBH20IO.h
+ * file:     PureSpaIO.h
  *
  * encoding: UTF-8
  * created:  14th March 2021
@@ -26,8 +26,8 @@
  *
  */
 
-#ifndef SBH20IO_H
-#define SBH20IO_H
+#ifndef PURE_SPA_IO_H
+#define PURE_SPA_IO_H
 
 #include <c_types.h>
 #include <WString.h>
@@ -127,9 +127,14 @@
  *
  */
 
-class SBH20IO
+class PureSpaIO
 {
 public:
+  enum MODEL
+  {
+    SBH20 = 1, SJBHS = 2
+  };
+
   class UNDEF
   {
   public:
@@ -149,23 +154,30 @@ public:
   void loop();
 
 public:
+  MODEL getModel() const;
+  const char* getModelName() const;
+
   bool isOnline() const;
 
   int getActWaterTempCelsius() const;
   int getDesiredWaterTempCelsius() const;
 
   uint8 isBubbleOn() const;
+  uint8 isBuzzerOn() const;
+  uint8 isDisinfectionOn() const;
   uint8 isFilterOn() const;
   uint8 isHeaterOn() const;
   uint8 isHeaterStandby() const;
+  uint8 isJetOn() const;
   uint8 isPowerOn() const;
-  uint8 isBuzzerOn() const;
 
   void setDesiredWaterTempCelsius(int temp);
 
   void setBubbleOn(bool on);
+  void setDisinfectionOn(bool on);
   void setFilterOn(bool on);
   void setHeaterOn(bool on);
+  void setJetOn(bool on);
   void setPowerOn(bool on);
 
   unsigned int getErrorValue() const;
@@ -259,7 +271,7 @@ private:
     uint16 displayValue       = UNDEF::USHORT;
     uint16 latestDisplayValue = UNDEF::USHORT;
 
-    uint16 receivedDigits = 0;
+    uint8 receivedDigits = 0;
 
     bool isDisplayBlinking = false;
 
@@ -269,8 +281,10 @@ private:
   struct Buttons
   {
     unsigned int toggleBubble   = 0;
+    unsigned int toggleDisinfection = 0;
     unsigned int toggleFilter   = 0;
     unsigned int toggleHeater   = 0;
+    unsigned int toggleJet          = 0;
     unsigned int togglePower    = 0;
     unsigned int toggleTempUp   = 0;
     unsigned int toggleTempDown = 0;
@@ -282,22 +296,12 @@ private:
   static ICACHE_RAM_ATTR inline void decodeDisplay();
   static ICACHE_RAM_ATTR inline void decodeLED();
   static ICACHE_RAM_ATTR inline void decodeButton();
-/*
-  ICACHE_RAM_ATTR inline void decodeDisplay();
-  ICACHE_RAM_ATTR inline void decodeLED();
-  ICACHE_RAM_ATTR inline void decodeButton();
-*/
 
 private:
   // ISR variables
   static volatile State state;
   static volatile IsrState isrState;
   static volatile Buttons buttons;
-/*
-  volatile State state;
-  volatile IsrState isrState;
-  volatile Buttons buttons;
- */
 
 private:
   uint16 convertDisplayToCelsius(uint16 value) const;
@@ -306,9 +310,10 @@ private:
   bool changeWaterTemp(int up);
 
 private:
+  MODEL model;
   LANG language;
   unsigned long lastStateUpdateTime = 0;
 };
 
-#endif /* SBH20IO_H */
+#endif /* PURE_SPA_IO_H */
 

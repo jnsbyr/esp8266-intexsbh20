@@ -1,7 +1,7 @@
 /*
  * project:  Intex PureSpa SB-H20 WiFi Controller
  *
- * file:     SBH20IO.cpp
+ * file:     PureSpaIO.cpp
  *
  * encoding: UTF-8
  * created:  14th March 2021
@@ -26,10 +26,12 @@
  *
  */
 
-#include "SBH20IO.h"
+#include "PureSpaIO.h"
 
 #include <ESP8266WiFi.h>
 
+
+#if defined MODEL_SB_H20
 
 // bit mask for LEDs
 namespace FRAME_LED
@@ -41,6 +43,49 @@ namespace FRAME_LED
   const uint16 BUBBLE         = 0x0400;  // max. 30 min
   const uint16 FILTER         = 0x1000;  // max. 24 h
 }
+
+// bit mask of button
+namespace FRAME_BUTTON
+{
+  const uint16 POWER     = 0x0400;
+  const uint16 FILTER    = 0x0002;
+  const uint16 HEATER    = 0x8000;
+  const uint16 BUBBLE    = 0x0008;
+  const uint16 TEMP_UP   = 0x1000;
+  const uint16 TEMP_DOWN = 0x0080;
+  const uint16 TEMP_UNIT = 0x2000;
+}
+
+#elif defined MODEL_SJB_HS
+
+// bit mask for LEDs
+namespace FRAME_LED
+{
+  const uint16 POWER          = 0x0001;
+  const uint16 BUBBLE         = 0x0002;  // max. 30 min
+  const uint16 HEATER_ON      = 0x0080;  // max. 72 h, will start filter, will not stop filter
+  const uint16 NO_BEEP        = 0x0100;
+  const uint16 HEATER_STANDBY = 0x0200;
+  const uint16 JET            = 0x0400;
+  const uint16 FILTER         = 0x1000;  // max. 24 h
+  const uint16 DISINFECTION   = 0x2000;  // max. 8 h
+}
+
+// bit mask of button
+namespace FRAME_BUTTON
+{
+  const uint16 DISINFECTION = 0x0001;
+  const uint16 BUBBLE       = 0x0002;
+  const uint16 JET          = 0x0008;
+  const uint16 FILTER       = 0x0080;
+  const uint16 TEMP_DOWN    = 0x0200;
+  const uint16 POWER        = 0x0400;
+  const uint16 TEMP_UP      = 0x1000;
+  const uint16 TEMP_UNIT    = 0x2000;
+  const uint16 HEATER       = 0x8000;
+}
+
+#endif
 
 namespace FRAME_DIGIT
 {
@@ -82,25 +127,18 @@ namespace FRAME_DIGIT
   const uint16 LET_N = SEGMENT_A | SEGMENT_B | SEGMENT_C | SEGMENT_E | SEGMENT_F;
 }
 
-// bit mask of button
-namespace FRAME_BUTTON
-{
-  const uint16 POWER     = 0x0400;
-  const uint16 FILTER    = 0x0002;
-  const uint16 HEATER    = 0x8000;
-  const uint16 BUBBLE    = 0x0008;
-  const uint16 TEMP_UP   = 0x1000;
-  const uint16 TEMP_DOWN = 0x0080;
-  const uint16 TEMP_UNIT = 0x2000;
-}
-
 // frame type markers
 namespace FRAME_TYPE
 {
   const uint16 CUE    = 0x0100;
   const uint16 LED    = 0x4000;
   const uint16 DIGIT  = FRAME_DIGIT::POS_1 | FRAME_DIGIT::POS_2 | FRAME_DIGIT::POS_3 | FRAME_DIGIT::POS_4;
+
+#if defined MODEL_SB_H20
   const uint16 BUTTON = CUE | FRAME_BUTTON::POWER | FRAME_BUTTON::FILTER | FRAME_BUTTON::HEATER | FRAME_BUTTON::BUBBLE | FRAME_BUTTON::TEMP_UP | FRAME_BUTTON::TEMP_DOWN | FRAME_BUTTON::TEMP_UNIT;
+#elif defined MODEL_SJB_HS
+  const uint16 BUTTON = CUE | FRAME_BUTTON::POWER | FRAME_BUTTON::FILTER | FRAME_BUTTON::HEATER | FRAME_BUTTON::BUBBLE | FRAME_BUTTON::TEMP_UP | FRAME_BUTTON::TEMP_DOWN | FRAME_BUTTON::TEMP_UNIT | FRAME_BUTTON::DISINFECTION | FRAME_BUTTON::JET;
+#endif
 }
 
 namespace DIGIT
@@ -129,6 +167,8 @@ namespace ERROR
   // internal binary value of error display (3 letters)
   const uint16 NONE             = 0;
   const uint16 NO_WATER_FLOW    = (DIGIT::LET_E << 8) | (9 << 4) | 0;
+  const uint16 SALT_LEVEL_LOW   = (DIGIT::LET_E << 8) | (9 << 4) | 1;
+  const uint16 SALT_LEVEL_HIGH  = (DIGIT::LET_E << 8) | (9 << 4) | 2;
   const uint16 WATER_TEMP_LOW   = (DIGIT::LET_E << 8) | (9 << 4) | 4;
   const uint16 WATER_TEMP_HIGH  = (DIGIT::LET_E << 8) | (9 << 4) | 5;
   const uint16 SYSTEM           = (DIGIT::LET_E << 8) | (9 << 4) | 6;
@@ -136,11 +176,13 @@ namespace ERROR
   const uint16 TEMP_SENSOR      = (DIGIT::LET_E << 8) | (9 << 4) | 9;
   const uint16 HEATING_ABORTED  = (DIGIT::LET_E << 8) | (DIGIT::LET_N << 4) | DIGIT::LET_D;
 
-  const uint16 VALUES[] = { NO_WATER_FLOW, WATER_TEMP_LOW, WATER_TEMP_HIGH, WATER_TEMP_HIGH, SYSTEM, DRY_FIRE_PROTECT, TEMP_SENSOR, HEATING_ABORTED };
+  const uint16 VALUES[] = { NO_WATER_FLOW, SALT_LEVEL_LOW, SALT_LEVEL_HIGH, WATER_TEMP_LOW, WATER_TEMP_HIGH, WATER_TEMP_HIGH, SYSTEM, DRY_FIRE_PROTECT, TEMP_SENSOR, HEATING_ABORTED };
   const unsigned int COUNT = sizeof(VALUES)/sizeof(uint16);
 
   // human readable error on display
   const char CODE_90[]    PROGMEM = "E90";
+  const char CODE_91[]    PROGMEM = "E91";
+  const char CODE_92[]    PROGMEM = "E92";
   const char CODE_94[]    PROGMEM = "E94";
   const char CODE_95[]    PROGMEM = "E95";
   const char CODE_96[]    PROGMEM = "E96";
@@ -151,6 +193,8 @@ namespace ERROR
 
   // English error messages
   const char EN_90[]    PROGMEM = "no water flow";
+  const char EN_91[]    PROGMEM = "salt level too low";
+  const char EN_92[]    PROGMEM = "salt level too high";
   const char EN_94[]    PROGMEM = "water temp too low";
   const char EN_95[]    PROGMEM = "water temp too high";
   const char EN_96[]    PROGMEM = "system error";
@@ -161,6 +205,8 @@ namespace ERROR
 
   // German error messages
   const char DE_90[]    PROGMEM = "kein Wasserdurchfluss";
+  const char DE_91[]    PROGMEM = "niedriges Salzniveau";
+  const char DE_92[]    PROGMEM = "hohes Salzniveau";
   const char DE_94[]    PROGMEM = "Wassertemperatur zu niedrig";
   const char DE_95[]    PROGMEM = "Wassertemperatur zu hoch";
   const char DE_96[]    PROGMEM = "Systemfehler";
@@ -170,9 +216,9 @@ namespace ERROR
   const char DE_OTHER[] PROGMEM = "Störung";
 
   const char* const TEXT[3][COUNT+1] PROGMEM = {
-                                                 { CODE_90, CODE_94, CODE_95, CODE_96, CODE_97, CODE_99, CODE_END, CODE_OTHER },
-                                                 { EN_90,   EN_94,   EN_95,   EN_96,   EN_97,   EN_99,   EN_END,   EN_OTHER },
-                                                 { DE_90,   DE_94,   DE_95,   DE_96,   DE_97,   DE_99,   DE_END,   DE_OTHER }
+                                                 { CODE_90, CODE_91, CODE_92, CODE_94, CODE_95, CODE_96, CODE_97, CODE_99, CODE_END, CODE_OTHER },
+                                                 { EN_90,   EN_91,   EN_92,   EN_94,   EN_95,   EN_96,   EN_97,   EN_99,   EN_END,   EN_OTHER },
+                                                 { DE_90,   DE_91,   DE_92,   DE_94,   DE_95,   DE_96,   DE_97,   DE_99,   DE_END,   DE_OTHER }
                                                };
 }
 
@@ -184,26 +230,52 @@ inline bool displayIsTemp(uint16 v)   { return display2Byte(v) == DIGIT::LET_C |
 inline bool displayIsError(uint16 v)  { return (v & 0xF000) == 0xE000; }
 inline bool displayIsBlank(uint16 v)  { return (v & 0xFFF0) == ((DIGIT::OFF << 12) + (DIGIT::OFF << 8) + (DIGIT::OFF <<4)); }
 
-volatile SBH20IO::State SBH20IO::state;
-volatile SBH20IO::IsrState SBH20IO::isrState;
-volatile SBH20IO::Buttons SBH20IO::buttons;
+volatile PureSpaIO::State PureSpaIO::state;
+volatile PureSpaIO::IsrState PureSpaIO::isrState;
+volatile PureSpaIO::Buttons PureSpaIO::buttons;
 
 
 // @TODO detect when latch signal stays low
 // @TODO detect act temp change during error
 // @TODO improve reliability of water temp change (counter auto repeat and too short press)
-void SBH20IO::setup(LANG language)
+void PureSpaIO::setup(LANG language)
 {
+#if defined MODEL_SB_H20
+  model = MODEL::SBH20;
+#elif defined MODEL_SJB_HS
+  model = MODEL::SJBHS;
+#else
+  #error no model (MODEL_SB_H20 or MODEL_SJB_HS) selected in common.h
+#endif
+
   this->language = language;
 
   pinMode(PIN::CLOCK, INPUT);
   pinMode(PIN::DATA,  INPUT);
   pinMode(PIN::LATCH, INPUT);
 
-  attachInterruptArg(digitalPinToInterrupt(PIN::CLOCK), SBH20IO::clockRisingISR, this, RISING);
+  attachInterruptArg(digitalPinToInterrupt(PIN::CLOCK), PureSpaIO::clockRisingISR, this, RISING);
 }
 
-void SBH20IO::loop()
+PureSpaIO::MODEL PureSpaIO::getModel() const
+{
+  return model;
+}
+
+const char* PureSpaIO::getModelName() const
+{
+  switch (model)
+  {
+    case MODEL::SBH20:
+      return PSTR("Intex PureSpa SB-H20");
+    case MODEL::SJBHS:
+      return PSTR("Intex PureSpa SJB-HS");
+    default:
+      return PSTR("unsupported Intex PureSpa model");
+  }
+}
+
+void PureSpaIO::loop()
 {
   // device online check
   unsigned long now = millis();
@@ -219,37 +291,37 @@ void SBH20IO::loop()
   }
 }
 
-bool SBH20IO::isOnline() const
+bool PureSpaIO::isOnline() const
 {
   return state.online;
 }
 
-unsigned int SBH20IO::getTotalFrames() const
+unsigned int PureSpaIO::getTotalFrames() const
 {
   return state.frameCounter;
 }
 
-unsigned int SBH20IO::getDroppedFrames() const
+unsigned int PureSpaIO::getDroppedFrames() const
 {
   return state.frameDropped;
 }
 
-int SBH20IO::getActWaterTempCelsius() const
+int PureSpaIO::getActWaterTempCelsius() const
 {
   return (state.waterTemp != UNDEF::USHORT) ? convertDisplayToCelsius(state.waterTemp) : UNDEF::USHORT;
 }
 
-int SBH20IO::getDesiredWaterTempCelsius() const
+int PureSpaIO::getDesiredWaterTempCelsius() const
 {
   return (state.desiredTemp != UNDEF::USHORT) ? convertDisplayToCelsius(state.desiredTemp) : UNDEF::USHORT;
 }
 
-unsigned int SBH20IO::getErrorValue() const
+unsigned int PureSpaIO::getErrorValue() const
 {
   return state.error;
 }
 
-String SBH20IO::getErrorMessage(unsigned int errorValue) const
+String PureSpaIO::getErrorMessage(unsigned int errorValue) const
 {
   if (errorValue)
   {
@@ -273,41 +345,58 @@ String SBH20IO::getErrorMessage(unsigned int errorValue) const
   }
 }
 
-unsigned int SBH20IO::getRawLedValue() const
+unsigned int PureSpaIO::getRawLedValue() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? state.ledStatus : UNDEF::USHORT;
 }
 
-uint8 SBH20IO::isPowerOn() const
+uint8 PureSpaIO::isPowerOn() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::POWER) != 0) : UNDEF::BOOL;
 }
 
-uint8 SBH20IO::isFilterOn() const
+uint8 PureSpaIO::isFilterOn() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::FILTER) != 0) : UNDEF::BOOL;
 }
 
-uint8 SBH20IO::isBubbleOn() const
+uint8 PureSpaIO::isBubbleOn() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::BUBBLE) != 0) : UNDEF::BOOL;
 }
 
-uint8 SBH20IO::isHeaterOn() const
+uint8 PureSpaIO::isHeaterOn() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & (FRAME_LED::HEATER_ON | FRAME_LED::HEATER_STANDBY)) != 0) : UNDEF::BOOL;
 }
 
-uint8 SBH20IO::isHeaterStandby() const
+uint8 PureSpaIO::isHeaterStandby() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::HEATER_STANDBY) != 0) : UNDEF::BOOL;
 }
 
-uint8 SBH20IO::isBuzzerOn() const
+uint8 PureSpaIO::isBuzzerOn() const
 {
   return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::NO_BEEP) == 0) : UNDEF::BOOL;
 }
 
+uint8 PureSpaIO::isDisinfectionOn() const
+{
+#ifdef MODEL_SJB_HS
+  return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::DISINFECTION) != 0) : UNDEF::BOOL;
+#else
+  return false;
+#endif
+}
+
+uint8 PureSpaIO::isJetOn() const
+{
+#ifdef MODEL_SJB_HS
+  return (state.ledStatus != UNDEF::USHORT) ? ((state.ledStatus & FRAME_LED::JET) != 0) : UNDEF::BOOL;
+#else
+  return false;
+#endif
+}
 
 /**
  * set desired water temperature by performing button up or down actions
@@ -321,7 +410,7 @@ uint8 SBH20IO::isBuzzerOn() const
  *
  * @param temp water temperature setpoint [°C]
  */
-void SBH20IO::setDesiredWaterTempCelsius(int temp)
+void PureSpaIO::setDesiredWaterTempCelsius(int temp)
 {
   if (temp >= WATER_TEMP::SET_MIN && temp <= WATER_TEMP::SET_MAX)
   {
@@ -401,7 +490,7 @@ void SBH20IO::setDesiredWaterTempCelsius(int temp)
  * @param buttonPressCount
  * @return true if beep was received, false if no beep was received until timeout
  */
-bool SBH20IO::pressButton(volatile unsigned int& buttonPressCount)
+bool PureSpaIO::pressButton(volatile unsigned int& buttonPressCount)
 {
   WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
   //WiFi.forceSleepBegin();
@@ -420,7 +509,7 @@ bool SBH20IO::pressButton(volatile unsigned int& buttonPressCount)
   return tries;
 }
 
-void SBH20IO::setBubbleOn(bool on)
+void PureSpaIO::setBubbleOn(bool on)
 {
   if (on ^ (isBubbleOn() == true))
   {
@@ -428,7 +517,15 @@ void SBH20IO::setBubbleOn(bool on)
   }
 }
 
-void SBH20IO::setFilterOn(bool on)
+void PureSpaIO::setDisinfectionOn(bool on)
+{
+  if (on ^ (isDisinfectionOn() == true))
+  {
+    pressButton(buttons.toggleDisinfection);
+  }
+}
+
+void PureSpaIO::setFilterOn(bool on)
 {
   if (on ^ (isFilterOn() == true))
   {
@@ -436,7 +533,7 @@ void SBH20IO::setFilterOn(bool on)
   }
 }
 
-void SBH20IO::setHeaterOn(bool on)
+void PureSpaIO::setHeaterOn(bool on)
 {
   if (on ^ (isHeaterOn() == true || isHeaterStandby() == true))
   {
@@ -444,7 +541,15 @@ void SBH20IO::setHeaterOn(bool on)
   }
 }
 
-void SBH20IO::setPowerOn(bool on)
+void PureSpaIO::setJetOn(bool on)
+{
+  if (on ^ (isDisinfectionOn() == true))
+  {
+    pressButton(buttons.toggleJet);
+  }
+}
+
+void PureSpaIO::setPowerOn(bool on)
 {
   bool active = isPowerOn() == true;
   if (on ^ active)
@@ -459,7 +564,7 @@ void SBH20IO::setPowerOn(bool on)
  *
  * @return true if buzzer is off, false if buzzer is still on after timeout
  */
-bool SBH20IO::waitBuzzerOff() const
+bool PureSpaIO::waitBuzzerOff() const
 {
   int tries = BUTTON::ACK_TIMEOUT/BUTTON::ACK_CHECK_PERIOD;
   while (state.buzzer && tries)
@@ -487,7 +592,7 @@ bool SBH20IO::waitBuzzerOff() const
  * @param up press up (> 0) or down (< 0) button
  * @return true if beep was received, false if no beep was received until timeout
  */
-bool SBH20IO::changeWaterTemp(int up)
+bool PureSpaIO::changeWaterTemp(int up)
 {
   if (isPowerOn() == true && state.error == ERROR::NONE)
   {
@@ -523,11 +628,11 @@ bool SBH20IO::changeWaterTemp(int up)
       DEBUG_MSG("\ncWT fail");
     }
   }
-  
+
   return false;
 }
 
-uint16 SBH20IO::convertDisplayToCelsius(uint16 value) const
+uint16 PureSpaIO::convertDisplayToCelsius(uint16 value) const
 {
   uint16 celsiusValue = display2Num(value);
   uint16 tempUint = display2Byte(value);
@@ -545,13 +650,13 @@ uint16 SBH20IO::convertDisplayToCelsius(uint16 value) const
   return (celsiusValue >= 0) && (celsiusValue <= 60) ? celsiusValue : UNDEF::USHORT;
 }
 
-ICACHE_RAM_ATTR void SBH20IO::clockRisingISR(void* arg)
+ICACHE_RAM_ATTR void PureSpaIO::clockRisingISR(void* arg)
 {
   bool data = !digitalRead(PIN::DATA);
   bool enable = digitalRead(PIN::LATCH) == LOW;
 
 /*
-  SBH20IO* sbh20io = (SBH20IO*)arg;
+  PureSpaIO* sbh20io = (PureSpaIO*)arg;
   volatile State& state = sbh20io->state;
   volatile IsrState& isrState = sbh20io->isrState;
 */
@@ -604,7 +709,7 @@ ICACHE_RAM_ATTR void SBH20IO::clockRisingISR(void* arg)
   }
 }
 
-ICACHE_RAM_ATTR inline void SBH20IO::decodeDisplay()
+ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
 {
   uint8 digit;
   switch (isrState.frameValue & FRAME_DIGIT::SEGMENTS)
@@ -853,7 +958,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeDisplay()
   // else not all digits set yet
 }
 
-ICACHE_RAM_ATTR inline void SBH20IO::decodeLED()
+ICACHE_RAM_ATTR inline void PureSpaIO::decodeLED()
 {
   if (isrState.frameValue == isrState.latestLedStatus)
   {
@@ -871,8 +976,10 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeLED()
       if (state.buzzer)
       {
         buttons.toggleBubble = 0;
+        buttons.toggleDisinfection = 0;
         buttons.toggleFilter = 0;
         buttons.toggleHeater = 0;
+        buttons.toggleJet = 0;
         buttons.togglePower = 0;
         buttons.toggleTempUp = 0;
         buttons.toggleTempDown = 0;
@@ -887,7 +994,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeLED()
   }
 }
 
-ICACHE_RAM_ATTR inline void SBH20IO::decodeButton()
+ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
 {
   if (isrState.frameValue & FRAME_BUTTON::FILTER)
   {
@@ -947,6 +1054,24 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeButton()
       buttons.toggleTempDown--;
     }
   }
+#ifdef MODEL_SJB_HS
+  else if (isrState.frameValue & FRAME_BUTTON::DISINFECTION)
+  {
+    if (buttons.toggleDisinfection)
+    {
+      isrState.reply = true;
+      buttons.toggleDisinfection--;
+    }
+  }
+  else if (isrState.frameValue & FRAME_BUTTON::JET)
+  {
+    if (buttons.toggleJet)
+    {
+      isrState.reply = true;
+      buttons.toggleJet--;
+    }
+  }
+#endif
   else if (isrState.frameValue & FRAME_BUTTON::TEMP_UNIT)
   {
     //DEBUG_MSG("T");
@@ -966,7 +1091,7 @@ ICACHE_RAM_ATTR inline void SBH20IO::decodeButton()
     delayMicroseconds(3);
     pinMode(PIN::DATA, INPUT);
 #else
-    //#error "160 MHz CPU frequency required! Pulse timing not possible at 80 MHz, because the code above takes too long to reach this point."
+    #error 160 MHz CPU frequency required! Pulse timing not possible at 80 MHz, because the code above takes too long to reach this point.
     // at least using Arduino methods
 #endif
     isrState.reply = false;

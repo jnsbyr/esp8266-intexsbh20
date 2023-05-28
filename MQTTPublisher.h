@@ -1,5 +1,5 @@
 /*
- * project:  Intex PureSpa SB-H20 WiFi Controller
+ * project:  Intex PureSpa WiFi Controller
  *
  * file:     MQTTPublisher.h
  *
@@ -30,19 +30,19 @@
 #include <c_types.h>
 
 class MQTTClient;
-class SBH20IO;
+class PureSpaIO;
 class NTCThermometer;
 
 
 class MQTTPublisher
 {
 public:
-  MQTTPublisher(MQTTClient& mqttClient, SBH20IO& poolIO, NTCThermometer& thermometer);
+  MQTTPublisher(MQTTClient& mqttClient, PureSpaIO& PureSpaIO, NTCThermometer& thermometer);
 
 public:
   void setRetainAll(bool retain);
   bool isRetainAll() const;
-  
+
 public:
   void loop();
 
@@ -61,7 +61,7 @@ private:
 
 private:
   MQTTClient& mqttClient;
-  SBH20IO& poolIO;
+  PureSpaIO& pureSpaIO;
   NTCThermometer& thermometer;
   bool retainAll;
 
