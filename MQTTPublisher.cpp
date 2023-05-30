@@ -131,7 +131,7 @@ void MQTTPublisher::loop()
       if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
       {
         publishIfDefined(MQTT_TOPIC::FILTER, pureSpaIO.isDisinfectionOn(), PureSpaIO::UNDEF::BOOL);
-        publishIfDefined(MQTT_TOPIC::BUBBLE, pureSpaIO.isJetOn(), PureSpaIO::UNDEF::BOOL);
+        publishIfDefined(MQTT_TOPIC::JET,    pureSpaIO.isJetOn(),          PureSpaIO::UNDEF::BOOL);
       }
 
       bool b = pureSpaIO.isHeaterOn();
