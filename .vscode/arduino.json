@@ -2,5 +2,5 @@
     "sketch": "esp8266-intexsbh20.ino",
     "configuration": "xtal=160,vt=iram,exception=enabled,ssl=basic,eesz=4M1M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200",
     "board": "esp8266:esp8266:d1_mini",
-    "port": "COM11"
+    "port": "COM3"
 }
