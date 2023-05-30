@@ -33,6 +33,8 @@
 
 #if defined MODEL_SB_H20
 
+const char MODEL_NAME[] = "Intex PureSpa SB-H20";
+
 // bit mask for LEDs
 namespace FRAME_LED
 {
@@ -57,6 +59,8 @@ namespace FRAME_BUTTON
 }
 
 #elif defined MODEL_SJB_HS
+
+const char MODEL_NAME[] = "Intex PureSpa SJB-HS";
 
 // bit mask for LEDs
 namespace FRAME_LED
@@ -240,14 +244,6 @@ volatile PureSpaIO::Buttons PureSpaIO::buttons;
 // @TODO improve reliability of water temp change (counter auto repeat and too short press)
 void PureSpaIO::setup(LANG language)
 {
-#if defined MODEL_SB_H20
-  model = MODEL::SBH20;
-#elif defined MODEL_SJB_HS
-  model = MODEL::SJBHS;
-#else
-  #error no model (MODEL_SB_H20 or MODEL_SJB_HS) selected in common.h
-#endif
-
   this->language = language;
 
   pinMode(PIN::CLOCK, INPUT);
@@ -264,15 +260,7 @@ PureSpaIO::MODEL PureSpaIO::getModel() const
 
 const char* PureSpaIO::getModelName() const
 {
-  switch (model)
-  {
-    case MODEL::SBH20:
-      return PSTR("Intex PureSpa SB-H20");
-    case MODEL::SJBHS:
-      return PSTR("Intex PureSpa SJB-HS");
-    default:
-      return PSTR("unsupported Intex PureSpa model");
-  }
+  return MODEL_NAME;
 }
 
 void PureSpaIO::loop()

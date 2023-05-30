@@ -189,7 +189,6 @@ public:
   unsigned int getDroppedFrames() const;
 
 private:
-
   class CYCLE
   {
   public:
@@ -262,11 +261,11 @@ private:
     unsigned int lastBlankDisplayFrameCounter = 0;
     unsigned int blankCounter = 0;
 
-    unsigned int stableDisplayValueCount     = CONFIRM_FRAMES::DISP;
-    unsigned int stableDisplayBlankCount     = CONFIRM_FRAMES::DISP;
-    unsigned int stableWaterTempCount        = CONFIRM_FRAMES::WATER_TEMP_ACT;
+    unsigned int stableDisplayValueCount      = CONFIRM_FRAMES::DISP;
+    unsigned int stableDisplayBlankCount      = CONFIRM_FRAMES::DISP;
+    unsigned int stableWaterTempCount         = CONFIRM_FRAMES::WATER_TEMP_ACT;
     unsigned int stableBlinkingWaterTempCount = 0;
-    unsigned int stableLedStatusCount        = CONFIRM_FRAMES::LED;
+    unsigned int stableLedStatusCount         = CONFIRM_FRAMES::LED;
 
     uint16 displayValue       = UNDEF::USHORT;
     uint16 latestDisplayValue = UNDEF::USHORT;
@@ -280,14 +279,14 @@ private:
 
   struct Buttons
   {
-    unsigned int toggleBubble   = 0;
+    unsigned int toggleBubble       = 0;
     unsigned int toggleDisinfection = 0;
-    unsigned int toggleFilter   = 0;
-    unsigned int toggleHeater   = 0;
+    unsigned int toggleFilter       = 0;
+    unsigned int toggleHeater       = 0;
     unsigned int toggleJet          = 0;
-    unsigned int togglePower    = 0;
-    unsigned int toggleTempUp   = 0;
-    unsigned int toggleTempDown = 0;
+    unsigned int togglePower        = 0;
+    unsigned int toggleTempUp       = 0;
+    unsigned int toggleTempDown     = 0;
   };
 
 private:
@@ -310,7 +309,16 @@ private:
   bool changeWaterTemp(int up);
 
 private:
+#if defined MODEL_SB_H20
+  MODEL model = MODEL::SBH20;
+#elif defined MODEL_SJB_HS
+  MODEL model = MODEL::SJBHS;
+#else
   MODEL model;
+  #error no model (MODEL_SB_H20 or MODEL_SJB_HS) selected in common.h
+#endif
+
+private:
   LANG language;
   unsigned long lastStateUpdateTime = 0;
 };
