@@ -27,35 +27,38 @@
  */
 
 /**
- * BUILD ENVIRONMENT:
- *
- * IDE: Arduino 1.8.13
- *
- * Libraries:
- *
- * - Arduino Core for ESP8266 2.7.4
- * - ArduinoJson 6.17.2
- * - PubSubClient (MQTT) 2.8.0
- *
- * Board: Wemos D1 mini (ESP8266)
- *
- * CPU:        160 MHz
- * Flash:      4M (FS: 1M, OTA: 1M)
- * Debug:      disabled
- * IwIP:       v2 lower memory
- * VTables:    IRAM
- * Exceptions: enabled
- *
- */
+   BUILD ENVIRONMENT:
+
+   IDE: Arduino 1.8.13
+
+   Libraries:
+
+   - Arduino Core for ESP8266 2.7.4
+   - ArduinoJson 6.17.2
+   - PubSubClient (MQTT) 2.8.0
+   - HomeKit-ESP8266 1.2.0
+
+   Board: Wemos D1 mini (ESP8266)
+
+   CPU:        160 MHz
+   Flash:      4M (FS: 1M, OTA: 1M)
+   Debug:      disabled
+   IwIP:       v2 lower memory
+   VTables:    IRAM
+   Exceptions: enabled
+
+*/
 
 #include "NTCThermometer.h"
 #include "OTAUpdate.h"
 #include "SBH20IO.h"
+#include "HomekitClient.h"
 #include "ConfigurationFile.h"
 #include "MQTTClient.h"
 #include "MQTTPublisher.h"
 #include "common.h"
 
+#define LOG_D(fmt, ...)   printf_P(PSTR(fmt "\n") , ##__VA_ARGS__);
 
 ConfigurationFile config;
 NTCThermometer thermometer;
@@ -65,6 +68,8 @@ SBH20IO poolIO;
 
 MQTTClient mqttClient;
 MQTTPublisher mqttPublisher(mqttClient, poolIO, thermometer);
+
+HomekitClient homekitClient(poolIO, thermometer);
 
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
@@ -118,8 +123,13 @@ void setup()
       mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
-      thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
+      thermometer.setup(22000, 3.33f, 320.f / 100.f); // measured: 21990, 3.327f, 319.f/99.6f
 
+      bool homekit_activated = config.exists(CONFIG_TAG::HOMEKIT_ACTIVATED) ? strcmp(config.get(CONFIG_TAG::HOMEKIT_ACTIVATED), "no") != 0 : false;
+      if(homekit_activated){
+        homekitClient.setup(config.get(CONFIG_TAG::HOMEKIT_PASSWORD));
+      }
+      
       // enable hardware watchdog (8.3 s) by disabling software watchdog
       ESP.wdtDisable();
 
@@ -164,15 +174,19 @@ void loop()
     }
     else
     {
-      // update MQTT
-      mqttClient.loop();
-      mqttPublisher.loop();
+      if (homekitClient.paired()) {
+        // update MQTT
+        mqttClient.loop();
+        mqttPublisher.loop();
+        // update pool
+        poolIO.loop();
+        // force idle
+        delay(100);
+      }
 
-      // update pool
-      poolIO.loop();
+      homekitClient.loop();
 
-      // force idle
-      delay(100);
+
     }
   }
   else

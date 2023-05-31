@@ -60,6 +60,9 @@ namespace CONFIG_TAG
   const char MQTT_PASSWORD[]   = "mqttPassword";
   const char MQTT_RETAIN[]     = "mqttRetain";
   const char MQTT_ERROR_LANG[] = "errorLanguage";
+
+  const char HOMEKIT_ACTIVATED[] = "homekitActivated";
+  const char HOMEKIT_PASSWORD[] = "homekitPassword";
 };
 
 // MQTT topics
