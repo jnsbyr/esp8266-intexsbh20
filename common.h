@@ -32,13 +32,13 @@
 
 // select Intex PureSpa model by commenting in the desired variant
 //#define MODEL_SB_H20
-#define MODEL_SJB_HS
+//#define MODEL_SJB_HS
 
 //#define SERIAL_DEBUG
 
 namespace CONFIG
 {
-  const char WIFI_VERSION[] = "1.0.3.2"; // 30.05.2023
+  const char WIFI_VERSION[] = "1.0.3.3"; // 31.05.2023
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot
@@ -69,32 +69,32 @@ namespace CONFIG_TAG
 namespace MQTT_TOPIC
 {
   // publish
-  const char BUBBLE[]     = "pool/bubble";
+  const char BUBBLE[]       = "pool/bubble";
   const char DISINFECTION[] = "pool/disinfection"; // SJB-HS only
-  const char ERROR[]      = "pool/error";
-  const char FILTER[]     = "pool/filter";
-  const char HEATER[]     = "pool/heater";
+  const char ERROR[]        = "pool/error";
+  const char FILTER[]       = "pool/filter";
+  const char HEATER[]       = "pool/heater";
   const char JET[]          = "pool/jet"; // SJB-HS only
-  const char MODEL[]      = "pool/model";
-  const char POWER[]      = "pool/power";
-  const char WATER_ACT[]  = "pool/water/tempAct";
-  const char WATER_SET[]  = "pool/water/tempSet";
-  const char VERSION[]    = "wifi/version";
-  const char IP[]         = "wifi/ip";
-  const char RSSI[]       = "wifi/rssi";
-  const char WIFI_TEMP[]  = "wifi/temp";
-  const char STATE[]      = "wifi/state";
-  const char OTA[]        = "wifi/update";
+  const char MODEL[]        = "pool/model";
+  const char POWER[]        = "pool/power";
+  const char WATER_ACT[]    = "pool/water/tempAct";
+  const char WATER_SET[]    = "pool/water/tempSet";
+  const char VERSION[]      = "wifi/version";
+  const char IP[]           = "wifi/ip";
+  const char RSSI[]         = "wifi/rssi";
+  const char WIFI_TEMP[]    = "wifi/temp";
+  const char STATE[]        = "wifi/state";
+  const char OTA[]          = "wifi/update";
 
   // subscribe
-  const char CMD_BUBBLE[] = "pool/command/bubble";
+  const char CMD_BUBBLE[]       = "pool/command/bubble";
   const char CMD_DISINFECTION[] = "pool/command/disinfection"; // SJB-HS only
-  const char CMD_FILTER[] = "pool/command/filter";
-  const char CMD_HEATER[] = "pool/command/heater";
+  const char CMD_FILTER[]       = "pool/command/filter";
+  const char CMD_HEATER[]       = "pool/command/heater";
   const char CMD_JET[]          = "pool/command/jet"; // SJB-HS only
-  const char CMD_POWER[]  = "pool/command/power";
-  const char CMD_WATER[]  = "pool/command/water/tempSet";
-  const char CMD_OTA[]    = "wifi/command/update";
+  const char CMD_POWER[]        = "pool/command/power";
+  const char CMD_WATER[]        = "pool/command/water/tempSet";
+  const char CMD_OTA[]          = "wifi/command/update";
 }
 
 // Languages

@@ -531,7 +531,7 @@ void PureSpaIO::setHeaterOn(bool on)
 
 void PureSpaIO::setJetOn(bool on)
 {
-  if (on ^ (isDisinfectionOn() == true))
+  if (on ^ (isJetOn() == true))
   {
     pressButton(buttons.toggleJet);
   }
