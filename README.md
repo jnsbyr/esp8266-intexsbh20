@@ -18,10 +18,10 @@ This projects was originally designed for the Intex PureSpa SB-H20 but it also
 supports other models:
 
  Model                  | Define [^1]  | Notes
- ---------------------- |:------------ |:---------------------------------
+ ---------------------- |:------------ |:---------------------------------------------------
  Intex PureSpa SB-H20   | MODEL_SB_H20 | supported
- Intex SimpleSpa SB–B20 | MODEL_SB_H20 | reported to be compatible, see #5
- Intex PureSpa SJB-HS   | MODEL_SJB_HS | supported, see #13
+ Intex SimpleSpa SB–B20 | MODEL_SB_H20 | reported to be compatible, see [issue #5](issues/5)
+ Intex PureSpa SJB-HS   | MODEL_SJB_HS | supported, see [issue #13](issues/13)
  Intex PureSpa SSP-H    | MODEL_SJB_HS | not tested [^2]
 
 [^1]: #define required for build (see common.h)
@@ -38,9 +38,9 @@ WiFi remote control using the [MQTT](https://mqtt.org/) protocol.
 This is no ready-to-use product. The acquisition of the required hardware
 components, their assembly and programming requires some experience with DIY
  electronics. Helpful details can also be found in the
-[issues](https://github.com/jnsbyr/esp8266-intexsbh20/issues) of this project
+[issues](issues) of this project
 (e.g. a table of the hardware components not shown in the schematic can be
-found in #2).
+found in [issue #2](issues/2)).
 
 > :warning: **WARNING**: If you decide to implement the presented solution
   you will void the warranty of your pool as it requires invasive
@@ -217,9 +217,9 @@ at the beginning of the file [common.h].
 The following **components** are required to build the firmware:
 
  Component    | Version | Notes
- ------------ |:------- |:------------------------------------------------------
- Arduino IDE  | 1.8     | firmware does not build successfully with 2.X, see #30
- ESP8266 SDK  | 2.7.4   | install using the Arduino board manager,<br/>3.1.2 is also reported to work, see #13
+ ------------ |:------- |:-------------------------------------------------------------------------------------------------------
+ Arduino IDE  | 1.8     | firmware does not build successfully with 2.X, see [issue #30](issues/30)
+ ESP8266 SDK  | 2.7.4   | install using the Arduino board manager,<br/>3.1.2 is also reported to work, see [issue #13](issues/13)
  ArduinoJSON  | 6.19.4  | install using the Arduino library manager
  PubSubClient | 2.8     | install using the Arduino library manager
  
