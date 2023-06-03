@@ -1,21 +1,54 @@
-# MQTT WiFi remote control for the Intex PureSpa SB-H20 whirlpool
+# MQTT WiFi remote control for Intex PureSpa whirlpools
 
 
 ### Table of contents
 
 [1. Compatibility](#compatibility)  
-[2. Motivation](#motivation)  
-[3. Hacking the SB-H20](#hacking-the-sb-h20)  
-[4. Building your own WiFi remote control](#building-your-own-wifi-remote-control)  
-[5. Contributing](#contributing)  
-[6. Licenses and Credits](#licenses-and-credits)
+[2. Introduction](#introduction)  
+[3. Motivation](#motivation)  
+[4. Hacking the SB-H20](#hacking-the-sb-h20)  
+[5. Building your own WiFi remote control](#building-your-own-wifi-remote-control)  
+[6. Contributing](#contributing)  
+[7. Licenses and Credits](#licenses-and-credits)
 
 
 ## Compatibility
 
-This projects was originally designed for the Intex PureSpa SB-H20. It is reported
-to work with the Intex SimpleSpa SB–B20 but is not compatible with the Intex SSP
-and SJB models.
+This projects was originally designed for the Intex PureSpa SB-H20 but it also
+supports other models:
+
+ Model                  | Define [^1]  | Notes
+ ---------------------- |:------------ |:---------------------------------
+ Intex PureSpa SB-H20   | MODEL_SB_H20 | supported
+ Intex SimpleSpa SB–B20 | MODEL_SB_H20 | reported to be compatible, see #5
+ Intex PureSpa SJB-HS   | MODEL_SJB_HS | supported, see #13
+ Intex PureSpa SSP-H    | MODEL_SJB_HS | not tested [^2]
+
+[^1]: #define required for build (see common.h)
+[^2]: should be partially compatible, could be supported
+
+
+## Introduction
+
+The Intex PureSpa models listed under [Compatibility](#compatibility) are
+standalone systems that do not have a remote control option. This projects
+provides information about the required hardware and software to provide
+WiFi remote control using the [MQTT](https://mqtt.org/) protocol.
+
+This is no ready-to-use product. The acquisition of the required hardware
+components, their assembly and programming requires some experience with DIY
+ electronics. Helpful details can also be found in the
+[issues](https://github.com/jnsbyr/esp8266-intexsbh20/issues) of this project
+(e.g. a table of the hardware components not shown in the schematic can be
+found in #2).
+
+> :warning: **WARNING**: If you decide to implement the presented solution
+  you will void the warranty of your pool as it requires invasive
+  modifications. You may only **USE THIS PROJECT AT YOUR OWN RISK**. The
+  information provided is meant to be helpful but may contain errors or may be
+  misinterpreted. Neither myself nor any of the contributors to this project
+  provide any warranty or will assume any responsibility for any damage you
+  cause yourself or others by using this project.
 
 
 ## Motivation
@@ -24,13 +57,12 @@ Reading the user manual of the Intex PureSpa SB-H20 was a mistake. Everyone
 who has ever read a user manual knows this. They just contain things you don't
 want to know.
 
-This model seems to be designed for daily attention. It is no news that the water
-of a pool should be run through a filter once or twice a day. Many pools have a
-timer for this, but not this one.
+This model seems to be designed for daily attention. It is no news that the
+water of a pool should be run through a filter at least once or twice a day.
+Many pools have a timer for this, but not this one.
 
-You could keep the circulation on permanently, but this has at least two
-disadvantages: The filter must be cleaned or replaced more often and you waste
-more than 1 kWh per day with the filter pump consuming around 60 W.
+You could keep the circulation on permanently, but this wastes more than 1 kWh
+per day with the filter pump consuming around 60 W.
 
 Somehow it should be possible to add a circulation pump timer. And if this can
 be done then the water temperature could also be controlled, thus combining power
@@ -68,8 +100,12 @@ facts:
 - the original control panel and an additional remote control unit can be attached
   in parallel to the mainboard because the signalling supports a multi-drop
   architecture for listening
-- the button signalling from the control panel to the mainboard seems to be
-  completely different from Geoffroy's description
+
+As Geoffroy did not document any details regarding the button signalling from
+the control panel to the mainboard, I assumed from the fact that Geoffroy used
+external hardware in addition to the ESP8266 that the SSP and SJB models
+require very special handling. As it later turned out the button signalling
+is also identical.
 
 Getting all the details right for this last aspect took a while. With the SB-H20
 data clock of 100 kHz it was like searching for a needle in a haystack. To get
@@ -108,23 +144,24 @@ the ESP8266 looses its connection to the AP and the MQTT server for a few second
 
 ## Building your own WiFi remote control
 
-So far the SB-H20 was not modified. To keep it that way an Intex control panel
-extension cable is needed to insert the WiFi remote control but I could not
-find a source. If you have access to a 3D printer you should have a look at this
+For the [hack](#hacking-the-sb-h20) described above no modification of the
+SB-H20 was not needed.
+
+This was good enough for a lab test but no permanent solution. To keep the
+required modifications of the pool to a minimum an extension cable is needed to 
+attach the WiFi remote control to the Intex control panel. I could not find a
+supplier that sells the Intex plugs separately. But if you have access to a 3D
+printer you should have a look at this 
 [3D model](https://www.thingiverse.com/thing:4130911). Otherwise you need to cut
 and tap the cable from the control panel to the main board.
 
-> :warning: **WARNING**: If you decide to continue you will void your warranty
-  for the SB-H20. You may only **USE THIS PROJECT AT YOUR OWN RISK**.
-  I do not provide any warranty and I will not assume any responsibility for any
-  damage you cause yourself or others by using this project.
 
 ### PCB
 
 Depending on your preferences you have several options available regarding the PCB:
 
 - use a perfboard (the ciruit is rather simple)
-- use the PCB design from @Elektroarzt
+- use the [PCB design](pcb) from @Elektroarzt
 - create you own customized PCB
 
 ![Perfboard](assets/Perfboard.jpg "compact perfboard with sandwich connectors")
@@ -135,7 +172,7 @@ It is not even essential to use the D1 mini, it just makes uploading the firmwar
 and the config file easier because you don't need an extra USB adapter and a 5 V DC
 converter is also included. Any other ESP8266 board with enough ports on the
 breakout will do (e.g. ESP12, HUZZAH) but may require slight adjustments to the
-circuit.
+circuit and the code.
 
 Before you make a final decision about the board type read the chapter about
 the [thermometer](#wifi-controller-thermometer) below.
@@ -144,11 +181,10 @@ the [thermometer](#wifi-controller-thermometer) below.
 
 Select a case that is IP64 or better to protect the circuit from moisture
 and to protect the pool users from electrical shock. The same applies to the
-cables and plugs. For my solution these components were the most expensive 
+cables and plugs. For my solution these components were the most expensive
 part of the project at around 30 EUR.
 
 ![CableTree](assets/CableTree.jpg "modified cable tree of Intex SB-H20 control panel")
-
 
 ### Power Supply
 
@@ -174,10 +210,26 @@ SB-H20 should have the reserve for this case.
 
 ### Firmware
 
-Build the firmware using the Arduino IDE with the board settings documented in the
-INO file and flash the MCU. Note that the firmware uses DHCP and the MQTT server
-is addressed by hostname. If you prefer static IPs you must modify the firmware
-appropriately.
+Select your Intex PureSpa model based on the table in the 
+[compatibility list](#compatibility) and comment in the corresponding *#define*
+at the beginning of the file [common.h].
+
+The following **components** are required to build the firmware:
+
+ Component    | Version | Notes
+ ------------ |:------- |:------------------------------------------------------
+ Arduino IDE  | 1.8     | firmware does not build successfully with 2.X, see #30
+ ESP8266 SDK  | 2.7.4   | install using the Arduino board manager,<br/>3.1.2 is also reported to work, see #13
+ ArduinoJSON  | 6.19.4  | install using the Arduino library manager
+ PubSubClient | 2.8     | install using the Arduino library manager
+ 
+Other versions may also work but are not tested.
+
+The required **board settings** are documented at the top of the INO file. Make sure
+to configure them in the Arduino IDE before building.
+
+Note that the firmware uses DHCP and the MQTT server is addressed by hostname.
+If you prefer static IPs you must modify the firmware appropriately.
 
 ### Configuration
 
@@ -201,13 +253,16 @@ Example:
 }
 ```
 
-If *mqttRetain* is omitted the MQTT messages will be published without the 
+If *mqttUser* is omitted no authentication is used for the MQTT connection and
+*mqttPassword* can also be omitted.
+
+If *mqttRetain* is omitted the MQTT messages will be published without the
 retained flag set. If defined all values except "no" will activate retaining.
 
 If *firmwareURL* is omitted OTA updates are disabled.
 
 For *errorLanguage* you can choose between "EN" and "DE". If *errorLanguage* is
-omitted, the control panel error code will be used. 
+omitted, the control panel error code will be used.
 
 All other config values are mandatory. If you get a parsing error in the serial
 monitor when starting the MCU look closely into your config file. Maybe you
@@ -222,8 +277,10 @@ Prepare your MQTT server for a new device.
  Topic              | Values                 | Unit | Notes
  ------------------ |:----------------------:|:----:| -----------------------------------
  pool/bubble        | on\|off                |      |
+ pool/disinfection  | on\|off                |      | SJB-HS only, experimental
  pool/filter        | on\|off                |      |
  pool/heater        | on\|standby\|off       |      |
+ pool/jet           | on\|off                |      | SJB-HS only
  pool/power         | on\|off                |      |
  pool/water/tempAct | int                    | °C   |
  pool/water/tempSet | int                    | °C   |
@@ -244,8 +301,10 @@ second.
 | Topic                      | Values  | Unit | Notes
 | -------------------------- |:-------:|:----:| -----------------------------------
 | pool/command/bubble        | on\|off |      |
+| pool/command/disinfection  | on\|off |      | SJB-HS only, experimental
 | pool/command/filter        | on\|off |      |
 | pool/command/heater        | on\|off |      |
+| pool/command/jet           | on\|off |      | SJB-HS only
 | pool/command/power         | on\|off |      |
 | pool/command/water/tempSet | int     | °C   |
 | wifi/command/update        | on      |      | start OTA update
@@ -320,13 +379,13 @@ and you can activate additional serial debugging in the firmware.
 Security aspects are typically not the focus of a DIY project and the basics
 for the electrical security have been mentioned above.
 
-Regarding the network security of the project you will notice that it
-does not include a webserver. At first glance this seems to reduce the
-usability. But you need the Aruduino IDE anyway to build and upload the
-firmware and uploading the config file with the Arduino IDE as a seconded
-step is seamless. And if you want a webserver anyway it would be easy to add.
+Regarding the network security of the project you will notice that it does
+not include a webserver. At first glance this seems to reduce the usability.
+But you need the Aruduino IDE anyway to build and upload the firmware and
+uploading the config file with the Arduino IDE as a second step is seamless.
+And if you still want a webserver, it should not be that hard to add.
 
-But not enabling the webserver is a security improvement because it is nearly
+Not enabling the webserver is a security improvement because it is nearly
 impossible to harden the webserver on an IoT device. That is why the project
 only uses TCP/IP clients with predefined servers: One is the MQTT client and
 the other is the OTA client. In this configuration a hacker must take over
