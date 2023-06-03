@@ -145,10 +145,10 @@ the ESP8266 looses its connection to the AP and the MQTT server for a few second
 ## Building your own WiFi remote control
 
 For the [hack](#hacking-the-sb-h20) described above no modification of the
-SB-H20 was not needed.
+SB-H20 was needed.
 
-This was good enough for a lab test but no permanent solution. To keep the
-required modifications of the pool to a minimum an extension cable is needed to 
+This was good enough for a lab test but not for a permanent solution. To keep the
+required modifications of the pool to a minimum an extension cable is needed to
 attach the WiFi remote control to the Intex control panel. I could not find a
 supplier that sells the Intex plugs separately. But if you have access to a 3D
 printer you should have a look at this 
@@ -188,7 +188,7 @@ part of the project at around 30 EUR.
 
 ### Power Supply
 
-This project will tap the 5 V DC power supplied by the SB-H20 mainboard to the
+This project will tap the 5 V DC power supplied by the PureSpa mainboard to the
 control panel. Using this power source avoids electrical hazards that may be
 introduced by adding an additional mains power supply. A battery might be an
 alternative, but with a typical power draw of 20 mA you need a rather large
@@ -201,12 +201,12 @@ time with a consumption at 70 mA. The power on current of the circuit is almost
 100 mA and if you have a lot of WiFi traffic addressing the ESP8266, e.g.
 broadcasts, the consumption might stay at 70 mA.
 
-Beware that the power reserve of the SB-H20 mainboard is unknown and that's why
+Beware that the power reserve of the PureSpa mainboard is unknown and that's why
 I added a fuse. It is still possible that the extra load of the WiFi controller
 may overtax or damage the mainboard. With a consumption of 20 mA the probability
 is rather low because a single segment of a 7-segment display alone will consume
 a few mA and not all segments are on all the time but the power supply of the
-SB-H20 should have the reserve for this case.
+PureSpa should have the reserve for this case.
 
 ### Firmware
 
@@ -309,17 +309,17 @@ second.
 | pool/command/water/tempSet | int     | °C   |
 | wifi/command/update        | on      |      | start OTA update
 
-The *pool* topics are equivalent to the buttons on the control panel of the SB-H20.
+The *pool* topics are equivalent to the buttons on the control panel of the PureSpa.
 Refer to the user manual for more details.
 
 Wait for the next update of the equivalent published topic after each command and
-use a timeout to detect command failure. The SB-H20 control panel can only handle
+use a timeout to detect command failure. The PureSpa control panel can only handle
 one command at a time. The duration for changing the water temperature depends on
 the temperature delta.
 
-If *wifi/state* is *error* you are only allowed to send the command *pool/command/power=off*.
-The SB-H20 will continue to beep for a while. To clear the error it is necessary
-to power down the SB-H20.
+If *wifi/state* is *error* you are only allowed to send the command
+*pool/command/power=off*. The PureSpa will continue to beep for a while. To
+clear the error it is necessary to power down the PureSpa.
 
 ### WiFi Controller Thermometer
 
@@ -360,7 +360,7 @@ input is limited to 1 V.
 
 ### Power On
 
-Connect the WiFi controller to the SB-H20. Verify the pinout before
+Connect the WiFi controller to the PureSpa. Verify the pinout before
 powering up the pool. After power up the control panel should operate
 normally. The WiFi controller should connect to the AP, receive an IP address
 and connect to the MQTT server within a few seconds. If this was successful it
