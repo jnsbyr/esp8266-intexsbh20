@@ -21,8 +21,6 @@ private:
       bool power = false;
       bool bubble = false;
       bool filter = false;
-      bool need_update = false;
-      unsigned int update_temperature = 40;
     };
   static volatile HKState hkState;
 
