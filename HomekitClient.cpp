@@ -77,30 +77,18 @@ void HomekitClient::loop() {
     // https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266/issues/154#issuecomment-996625853
     //announce();
     //LOG_D("isPaired : %s", homekit_is_paired()?"yes":"no");
-    //LOG_D("Free heap: %d, HomeKit clients: %d", ESP.getFreeHeap(), arduino_homekit_connected_clients_count());
-  }
-
-
-  if (t > now_state && homekit_is_paired()) {
-    now_state = t + 10 * 1000;
-
-    
-  }
-
-  if (t > now_temperature && homekit_is_paired()) {
-    now_temperature = t + 60 * 1000;
-    
+    LOG_D("Free heap: %d, HomeKit clients: %d", ESP.getFreeHeap(), arduino_homekit_connected_clients_count());
   }
 
   if(homekit_is_paired()){
-    /*
+    
     updater_target_state();
     updater_current_temperature();
     updater_target_temperature();
     updater_power_button();
     updater_bubble_button();
     updater_filter_button();
-    updater_extern_temperature();*/
+    updater_extern_temperature();
 
     if(hkState.need_update){
       LOG_D("NEED_UPDATE %i", hkState.update_temperature);

@@ -36,7 +36,7 @@
    - Arduino Core for ESP8266 2.7.4
    - ArduinoJson 6.17.2
    - PubSubClient (MQTT) 2.8.0
-   - HomeKit-ESP8266 1.2.0
+   - HomeKit-ESP8266 Adapted version https://github.com/louis49/Arduino-HomeKit-ESP8266
 
    Board: Wemos D1 mini (ESP8266)
 
@@ -49,16 +49,25 @@
 
 */
 
+#define USE_HOMEKIT
+#define USE_MQTT
+
 #include "NTCThermometer.h"
 #include "OTAUpdate.h"
 #include "SBH20IO.h"
+
+#ifdef USE_HOMEKIT
 #include "HomekitClient.h"
+#endif
+
 #include "ConfigurationFile.h"
+
+#ifdef USE_MQTT
 #include "MQTTClient.h"
 #include "MQTTPublisher.h"
-#include "common.h"
+#endif
 
-#define LOG_D(fmt, ...)   printf_P(PSTR(fmt "\n") , ##__VA_ARGS__);
+#include "common.h"
 
 ConfigurationFile config;
 NTCThermometer thermometer;
@@ -66,10 +75,14 @@ OTAUpdate otaUpdate;
 
 SBH20IO poolIO;
 
+#ifdef USE_MQTT
 MQTTClient mqttClient;
 MQTTPublisher mqttPublisher(mqttClient, poolIO, thermometer);
+#endif
 
+#ifdef USE_HOMEKIT
 HomekitClient homekitClient(poolIO, thermometer);
+#endif
 
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
@@ -98,6 +111,7 @@ void setup()
       WiFi.mode(WIFI_STA);
       WiFi.begin(config.get(CONFIG_TAG::WIFI_SSID), config.get(CONFIG_TAG::WIFI_PASSPHRASE));
 
+      #ifdef USE_MQTT
       // init MQTT
       bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN)? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
       mqttPublisher.setRetainAll(retainAll);
@@ -121,14 +135,14 @@ void setup()
         language = lang == "EN"? LANG::EN : (lang == "DE"? LANG::DE : LANG::CODE);
       }
       mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_USER), config.get(CONFIG_TAG::MQTT_PASSWORD), CONFIG::POOL_MODEL_NAME, MQTT_TOPIC::STATE, "offline");
-
+      #endif
+      
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f / 100.f); // measured: 21990, 3.327f, 319.f/99.6f
 
-      bool homekit_activated = config.exists(CONFIG_TAG::HOMEKIT_ACTIVATED) ? strcmp(config.get(CONFIG_TAG::HOMEKIT_ACTIVATED), "no") != 0 : false;
-      if(homekit_activated){
-        homekitClient.setup(config.get(CONFIG_TAG::HOMEKIT_PASSWORD));
-      }
+      #ifdef USE_HOMEKIT
+      homekitClient.setup(config.get(CONFIG_TAG::HOMEKIT_PASSWORD));
+      #endif
       
       // enable hardware watchdog (8.3 s) by disabling software watchdog
       ESP.wdtDisable();
@@ -165,8 +179,10 @@ void loop()
 
     if (!initialized)
     {
+      #ifdef USE_MQTT
       // publish client IP address
       mqttClient.addMetadata(MQTT_TOPIC::IP, WiFi.localIP().toString().c_str());
+      #endif
 
       // init whirlpool I/O after first WiFi connect
       poolIO.setup(language);
@@ -174,18 +190,22 @@ void loop()
     }
     else
     {
+      #ifdef USE_HOMEKIT
       if (homekitClient.paired()) {
+      #endif
+        #ifdef USE_MQTT
         // update MQTT
         mqttClient.loop();
         mqttPublisher.loop();
+        #endif
         // update pool
         poolIO.loop();
         // force idle
         delay(100);
+      #ifdef USE_HOMEKIT
       }
-
       homekitClient.loop();
-
+      #endif
 
     }
   }
