@@ -147,7 +147,7 @@ void MQTTPublisher::loop()
       publishIfDefined("pool/telegram/led", pureSpaIO.getRawLedValue(), PureSpaIO::UNDEF::USHORT);
 #endif
 
-      unsigned int errorVal = pureSpaIO.getErrorValue();
+      uint32 errorVal = pureSpaIO.getErrorValue();
       if (errorVal == 0)
       {
         mqttClient.publish(MQTT_TOPIC::STATE, "online", retainAll, forcedStateUpdate);

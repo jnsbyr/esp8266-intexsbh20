@@ -132,14 +132,16 @@ class PureSpaIO
 public:
   enum MODEL
   {
-    SBH20 = 1, SJBHS = 2
+    SBH20 = 1,
+    SJBHS = 2
   };
 
   class UNDEF
   {
   public:
-    static const uint8 BOOL     = 0xFF;
-    static const uint16 USHORT = 0xFFFF;
+    static const uint8 BOOL    = 0xFFU;
+    static const uint16 USHORT = 0xFFFFU;
+    static const uint32 UINT   = 0xFFFFFFFFU;
   };
 
   class WATER_TEMP
@@ -180,8 +182,8 @@ public:
   void setJetOn(bool on);
   void setPowerOn(bool on);
 
-  unsigned int getErrorValue() const;
-  String getErrorMessage(unsigned int errorValue) const;
+  uint32 getErrorValue() const;
+  String getErrorMessage(uint32 errorValue) const;
 
   unsigned int getRawLedValue() const;
 
@@ -233,12 +235,12 @@ private:
 private:
   struct State
   {
-    uint16 waterTemp   = UNDEF::USHORT;
-    uint16 desiredTemp = UNDEF::USHORT;
+    uint32 waterTemp   = UNDEF::UINT; // ASCII, 4 chars, includes unit
+    uint32 desiredTemp = UNDEF::UINT; // ASCII, 4 chars, includes unit
     uint16 ledStatus   = UNDEF::USHORT;
 
     bool buzzer = false;
-    uint16 error = 0;
+    uint32 error = 0; // ASCII, 3 chars
     unsigned int lastErrorChangeFrameCounter = 0;
 
     bool online = false;
@@ -250,10 +252,10 @@ private:
 
   struct IsrState
   {
-    uint16 latestWaterTemp    = UNDEF::USHORT;
-    uint16 latestBlinkingTemp = UNDEF::USHORT;
+    uint32 latestWaterTemp    = UNDEF::UINT;
+    uint32 latestBlinkingTemp = UNDEF::UINT;
     uint16 latestLedStatus    = UNDEF::USHORT;
-    uint8 latestTempUnit      = 0;
+    char latestTempUnit      = 0;
 
     uint16 frameValue = 0;
     uint16 receivedBits = 0;
@@ -267,8 +269,8 @@ private:
     unsigned int stableBlinkingWaterTempCount = 0;
     unsigned int stableLedStatusCount         = CONFIRM_FRAMES::LED;
 
-    uint16 displayValue       = UNDEF::USHORT;
-    uint16 latestDisplayValue = UNDEF::USHORT;
+    uint32 displayValue       = UNDEF::UINT;
+    uint32 latestDisplayValue = UNDEF::UINT;
 
     uint8 receivedDigits = 0;
 
@@ -303,7 +305,7 @@ private:
   static volatile Buttons buttons;
 
 private:
-  uint16 convertDisplayToCelsius(uint16 value) const;
+  uint16 convertDisplayToCelsius(uint32 value) const;
   bool waitBuzzerOff() const;
   bool pressButton(volatile unsigned int& buttonPressCount);
   bool changeWaterTemp(int up);

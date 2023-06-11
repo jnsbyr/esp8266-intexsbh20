@@ -156,32 +156,26 @@ namespace DIGIT
   const uint8 POS_1_2_3 = POS_1 | POS_2 | POS_3;
   const uint8 POS_ALL   = POS_1 | POS_2 | POS_3 | POS_4;
 
-  // nibble value used to map a subset of non-numeric states of the 7-segment display
-  const uint8 LET_C = 0xC;
-  const uint8 LET_D = 0xD;
-  const uint8 LET_E = 0xE;
-  const uint8 LET_F = 0xF;
-
-  const uint8 LET_N = 0xA;
-  const uint8 OFF   = 0xB;
+  // ASCII values used to map non-numeric states of the 7-segment display
+  const char OFF = ' ';
 };
 
 namespace ERROR
 {
   // internal binary value of error display (3 letters)
-  const uint16 NONE             = 0;
-  const uint16 NO_WATER_FLOW    = (DIGIT::LET_E << 8) | (9 << 4) | 0;
-  const uint16 SALT_LEVEL_LOW   = (DIGIT::LET_E << 8) | (9 << 4) | 1;
-  const uint16 SALT_LEVEL_HIGH  = (DIGIT::LET_E << 8) | (9 << 4) | 2;
-  const uint16 WATER_TEMP_LOW   = (DIGIT::LET_E << 8) | (9 << 4) | 4;
-  const uint16 WATER_TEMP_HIGH  = (DIGIT::LET_E << 8) | (9 << 4) | 5;
-  const uint16 SYSTEM           = (DIGIT::LET_E << 8) | (9 << 4) | 6;
-  const uint16 DRY_FIRE_PROTECT = (DIGIT::LET_E << 8) | (9 << 4) | 7;
-  const uint16 TEMP_SENSOR      = (DIGIT::LET_E << 8) | (9 << 4) | 9;
-  const uint16 HEATING_ABORTED  = (DIGIT::LET_E << 8) | (DIGIT::LET_N << 4) | DIGIT::LET_D;
+  const uint32 NONE             = 0;
+  const uint32 NO_WATER_FLOW    = (uint32)"E90";
+  const uint32 SALT_LEVEL_LOW   = (uint32)"E91";
+  const uint32 SALT_LEVEL_HIGH  = (uint32)"E92";
+  const uint32 WATER_TEMP_LOW   = (uint32)"E94";
+  const uint32 WATER_TEMP_HIGH  = (uint32)"E95";
+  const uint32 SYSTEM           = (uint32)"E96";
+  const uint32 DRY_FIRE_PROTECT = (uint32)"E97";
+  const uint32 TEMP_SENSOR      = (uint32)"E99";
+  const uint32 HEATING_ABORTED  = (uint32)"END";
 
-  const uint16 VALUES[] = { NO_WATER_FLOW, SALT_LEVEL_LOW, SALT_LEVEL_HIGH, WATER_TEMP_LOW, WATER_TEMP_HIGH, WATER_TEMP_HIGH, SYSTEM, DRY_FIRE_PROTECT, TEMP_SENSOR, HEATING_ABORTED };
-  const unsigned int COUNT = sizeof(VALUES)/sizeof(uint16);
+  const uint32 VALUES[] = { NO_WATER_FLOW, SALT_LEVEL_LOW, SALT_LEVEL_HIGH, WATER_TEMP_LOW, WATER_TEMP_HIGH, WATER_TEMP_HIGH, SYSTEM, DRY_FIRE_PROTECT, TEMP_SENSOR, HEATING_ABORTED };
+  const unsigned int COUNT = sizeof(VALUES)/sizeof(NONE);
 
   // human readable error on display
   const char CODE_90[]    PROGMEM = "E90";
@@ -227,12 +221,13 @@ namespace ERROR
 }
 
 // special display values
-inline uint8 display2Byte(uint16 v)    { return v & 0x000F; }
-inline uint16 display2Num(uint16 v)   { return (((v >> 12) & 0x000F)*100) + (((v >> 8) & 0x000F)*10) + ((v >> 4) & 0x000F); }
-inline uint16 display2Error(uint16 v) { return (v >> 4) & 0x0FFF; }
-inline bool displayIsTemp(uint16 v)   { return display2Byte(v) == DIGIT::LET_C || display2Byte(v) == DIGIT::LET_F; }
-inline bool displayIsError(uint16 v)  { return (v & 0xF000) == 0xE000; }
-inline bool displayIsBlank(uint16 v)  { return (v & 0xFFF0) == ((DIGIT::OFF << 12) + (DIGIT::OFF << 8) + (DIGIT::OFF <<4)); }
+inline char display2LastDigit(uint32 v) { return v & 0x000000FFU; }
+inline uint16 display2Num(uint32 v)     { return (((v >> 24) & 0xFFU)*100) + (((v >> 16) & 0xFFU)*10) + ((v >> 8) & 0xFFU); }
+inline uint32 display2Error(uint32 v)   { return (v >> 8) & 0x00FFFFFFU; }
+inline bool displayIsTemp(uint32 v)     { return display2LastDigit(v) == 'C' || display2LastDigit(v) == 'F'; }
+inline bool displayIsTime(uint32 v)     { return display2LastDigit(v) == 'H'; }
+inline bool displayIsError(uint32 v)    { return (v & 0xFF000000U) == ((uint32)'E') << 24; }
+inline bool displayIsBlank(uint32 v)    { return (v & 0xFFFFFF00U) == (uint32)"   "; }
 
 volatile PureSpaIO::State PureSpaIO::state;
 volatile PureSpaIO::IsrState PureSpaIO::isrState;
@@ -296,12 +291,12 @@ unsigned int PureSpaIO::getDroppedFrames() const
 
 int PureSpaIO::getActWaterTempCelsius() const
 {
-  return (state.waterTemp != UNDEF::USHORT) ? convertDisplayToCelsius(state.waterTemp) : UNDEF::USHORT;
+  return (state.waterTemp != UNDEF::UINT) ? convertDisplayToCelsius(state.waterTemp) : UNDEF::UINT;
 }
 
 int PureSpaIO::getDesiredWaterTempCelsius() const
 {
-  return (state.desiredTemp != UNDEF::USHORT) ? convertDisplayToCelsius(state.desiredTemp) : UNDEF::USHORT;
+  return (state.desiredTemp != UNDEF::UINT) ? convertDisplayToCelsius(state.desiredTemp) : UNDEF::UINT;
 }
 
 unsigned int PureSpaIO::getErrorValue() const
@@ -314,17 +309,25 @@ String PureSpaIO::getErrorMessage(unsigned int errorValue) const
   if (errorValue)
   {
     // get error text index of error value
-    unsigned int i;
-    for (i=0; i<ERROR::COUNT; i++)
+    unsigned int j = UINT_MAX;
+    for (unsigned int i=0; i<ERROR::COUNT; i++)
     {
       if (ERROR::VALUES[i] == errorValue)
       {
+        j = i;
         break;
       }
     }
 
     // load error text from PROGMEM
-    return FPSTR(ERROR::TEXT[(unsigned int)language][i]);
+    if (j != UINT_MAX)
+    {
+      return FPSTR(ERROR::TEXT[(unsigned int)language][j]);
+    }
+    else
+    {
+      return "undefined";
+    }
   }
   else
   {
@@ -620,17 +623,17 @@ bool PureSpaIO::changeWaterTemp(int up)
   return false;
 }
 
-uint16 PureSpaIO::convertDisplayToCelsius(uint16 value) const
+uint16 PureSpaIO::convertDisplayToCelsius(uint32 value) const
 {
   uint16 celsiusValue = display2Num(value);
-  uint16 tempUint = display2Byte(value);
-  if (tempUint == DIGIT::LET_F)
+  char tempUnit = display2LastDigit(value);
+  if (tempUnit == 'F')
   {
     // convert °F to °C
     float fValue = (float)celsiusValue;
     celsiusValue = (uint16)round(((fValue - 32) * 5) / 9);
   }
-  else if (tempUint != DIGIT::LET_C)
+  else if (tempUnit != 'C')
   {
     celsiusValue = UNDEF::USHORT;
   }
@@ -699,56 +702,59 @@ ICACHE_RAM_ATTR void PureSpaIO::clockRisingISR(void* arg)
 
 ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
 {
-  uint8 digit;
+  char digit;
   switch (isrState.frameValue & FRAME_DIGIT::SEGMENTS)
   {
     case FRAME_DIGIT::OFF:
       digit = DIGIT::OFF;
       break;
     case FRAME_DIGIT::NUM_0:
-      digit = 0x0;
+      digit = '0';
       break;
     case FRAME_DIGIT::NUM_1:
-      digit = 0x1;
+      digit = '1';
       break;
     case FRAME_DIGIT::NUM_2:
-      digit = 0x2;
+      digit = '2';
       break;
     case FRAME_DIGIT::NUM_3:
-      digit = 0x3;
+      digit = '3';
       break;
     case FRAME_DIGIT::NUM_4:
-      digit = 0x4;
+      digit = '4';
       break;
     case FRAME_DIGIT::NUM_5:
-      digit = 0x5;
+      digit = '5';
       break;
     case FRAME_DIGIT::NUM_6:
-      digit = 0x6;
+      digit = '6';
       break;
     case FRAME_DIGIT::NUM_7:
-      digit = 0x7;
+      digit = '7';
       break;
     case FRAME_DIGIT::NUM_8:
-      digit = 0x8;
+      digit = '8';
       break;
     case FRAME_DIGIT::NUM_9:
-      digit = 0x9;
+      digit = '9';
       break;
     case FRAME_DIGIT::LET_C:
-      digit = DIGIT::LET_C; // for °C
+      digit = 'C'; // temp unit °C
       break;
     case FRAME_DIGIT::LET_D:
-      digit = DIGIT::LET_D; // for error code "END"
+      digit = 'D';
       break;
     case FRAME_DIGIT::LET_E:
-      digit = DIGIT::LET_E; // for error code
+      digit = 'E';
       break;
     case FRAME_DIGIT::LET_F:
-      digit = DIGIT::LET_F; // for °F
+      digit = 'F'; // temp unit °F
+      break;
+    case FRAME_DIGIT::LET_H:
+      digit = 'H';
       break;
     case FRAME_DIGIT::LET_N:
-      digit = DIGIT::LET_N; // for error code "END"
+      digit = 'N';
       break;
 
     default:
@@ -760,7 +766,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
   {
     case FRAME_DIGIT::POS_1:
       //DEBUG_MSG("1");
-      isrState.displayValue = (isrState.displayValue & 0x0FFF) + (digit << 12);
+      isrState.displayValue = (isrState.displayValue & 0x00FFFFFFU) + (digit << 24);
       isrState.receivedDigits = DIGIT::POS_1;
       break;
 
@@ -768,7 +774,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
       //DEBUG_MSG("2");
       if (isrState.receivedDigits == DIGIT::POS_1)
       {
-        isrState.displayValue = (isrState.displayValue & 0xF0FF) + (digit << 8);
+        isrState.displayValue = (isrState.displayValue & 0xFF00FFFFU) + (digit << 16);
         isrState.receivedDigits |= DIGIT::POS_2;
       }
       break;
@@ -777,7 +783,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
       //DEBUG_MSG("3");
       if (isrState.receivedDigits == DIGIT::POS_1_2)
       {
-        isrState.displayValue = (isrState.displayValue & 0xFF0F) + (digit << 4);
+        isrState.displayValue = (isrState.displayValue & 0xFFFF00FFU) + (digit << 8);
         isrState.receivedDigits |= DIGIT::POS_3;
       }
       break;
@@ -786,7 +792,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
       //DEBUG_MSG("4");
       if (isrState.receivedDigits == DIGIT::POS_1_2_3)
       {
-        isrState.displayValue = (isrState.displayValue & 0xFFF0) + digit;
+        isrState.displayValue = (isrState.displayValue & 0xFFFFFF00U) + digit;
         isrState.receivedDigits = DIGIT::POS_ALL;
       }
       break;
@@ -811,7 +817,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
             // blinking is over, clear desired temp
             //DEBUG_MSG("b");
             isrState.isDisplayBlinking = false;
-            isrState.latestBlinkingTemp = UNDEF::USHORT;
+            isrState.latestBlinkingTemp = UNDEF::UINT;
           }
         }
 
@@ -858,7 +864,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
                   }
 
                   // get temp unit
-                  uint16 tempUnit = display2Byte(isrState.displayValue);
+                  char tempUnit = display2LastDigit(isrState.displayValue);
                   if (tempUnit != isrState.latestTempUnit)
                   {
                     isrState.latestTempUnit = tempUnit;
@@ -907,7 +913,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
         if (isrState.isDisplayBlinking)
         {
           // already blinking
-          if (isrState.latestBlinkingTemp != UNDEF::USHORT)
+          if (isrState.latestBlinkingTemp != UNDEF::UINT)
           {
             // new temp
             isrState.blankCounter++;
@@ -923,7 +929,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
             state.desiredTemp = isrState.latestBlinkingTemp;
           }
 
-          isrState.latestBlinkingTemp = UNDEF::USHORT;
+          isrState.latestBlinkingTemp = UNDEF::UINT;
           isrState.stableBlinkingWaterTempCount = 0;
         }
         else
