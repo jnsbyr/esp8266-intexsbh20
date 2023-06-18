@@ -139,9 +139,10 @@ public:
   class UNDEF
   {
   public:
-    static const uint8 BOOL    = 0xFFU;
-    static const uint16 USHORT = 0xFFFFU;
-    static const uint32 UINT   = 0xFFFFFFFFU;
+    static const uint8  BOOL   = UCHAR_MAX;
+    static const uint16 USHORT = USHRT_MAX;
+    static const uint32 UINT   = UINT_MAX;
+    static const sint32 INT    = -99;
   };
 
   class WATER_TEMP
@@ -163,6 +164,7 @@ public:
 
   int getActWaterTempCelsius() const;
   int getDesiredWaterTempCelsius() const;
+  int getDisinfectionTime() const;
 
   uint8 isBubbleOn() const;
   uint8 isBuzzerOn() const;
@@ -182,8 +184,8 @@ public:
   void setJetOn(bool on);
   void setPowerOn(bool on);
 
-  uint32 getErrorValue() const;
-  String getErrorMessage(uint32 errorValue) const;
+  String getErrorCode() const;
+  String getErrorMessage(const String& errorCode) const;
 
   unsigned int getRawLedValue() const;
 
@@ -218,10 +220,8 @@ private:
   class CONFIRM_FRAMES
   {
   public:
-    static const unsigned int LED            = 3;
-    static const unsigned int DISP           = 3;
-    static const unsigned int WATER_TEMP_SET = 3;
-    static const unsigned int WATER_TEMP_ACT = BLINK::PERIOD/2*FRAME::FREQUENCY/CYCLE::DISPLAY_FRAMES; // ms, must be high enough to tell from blinking
+    static const unsigned int REGULAR      = 3; // ms, for values which do not blink
+    static const unsigned int NOT_BLINKING = BLINK::PERIOD/2*FRAME::FREQUENCY/CYCLE::DISPLAY_FRAMES; // ms, must be high enough to tell from blinking
   };
 
   class BUTTON
@@ -235,27 +235,28 @@ private:
 private:
   struct State
   {
-    uint32 waterTemp   = UNDEF::UINT; // ASCII, 4 chars, includes unit
-    uint32 desiredTemp = UNDEF::UINT; // ASCII, 4 chars, includes unit
-    uint16 ledStatus   = UNDEF::USHORT;
+    uint32 waterTemp        = UNDEF::UINT; // ASCII, 4 chars, includes unit
+    uint32 desiredTemp      = UNDEF::UINT; // ASCII, 4 chars, includes unit
+    uint32 disinfectionTime = UNDEF::UINT; // ASCII, 4 chars, includes unit
+    uint32 error            = ERROR_NONE;  // ASCII, 3 chars, null terminated, requires power cycle to reset
+
+    uint16 ledStatus        = UNDEF::USHORT;
 
     bool buzzer = false;
-    uint32 error = 0; // ASCII, 3 chars
-    unsigned int lastErrorChangeFrameCounter = 0;
-
     bool online = false;
     bool stateUpdated = false;
 
+    unsigned int lastErrorChangeFrameCounter = 0;
     unsigned int frameCounter = 0;
     unsigned int frameDropped = 0;
   };
 
   struct IsrState
   {
-    uint32 latestWaterTemp    = UNDEF::UINT;
-    uint32 latestBlinkingTemp = UNDEF::UINT;
-    uint16 latestLedStatus    = UNDEF::USHORT;
-    char latestTempUnit      = 0;
+    uint32 latestWaterTemp        = UNDEF::UINT;
+    uint32 latestBlinkingTemp     = UNDEF::UINT;
+    uint32 latestDisinfectionTime = UNDEF::UINT;
+    uint16 latestLedStatus = UNDEF::USHORT;
 
     uint16 frameValue = 0;
     uint16 receivedBits = 0;
@@ -263,11 +264,12 @@ private:
     unsigned int lastBlankDisplayFrameCounter = 0;
     unsigned int blankCounter = 0;
 
-    unsigned int stableDisplayValueCount      = CONFIRM_FRAMES::DISP;
-    unsigned int stableDisplayBlankCount      = CONFIRM_FRAMES::DISP;
-    unsigned int stableWaterTempCount         = CONFIRM_FRAMES::WATER_TEMP_ACT;
+    unsigned int stableDisplayValueCount      = CONFIRM_FRAMES::REGULAR;
+    unsigned int stableDisplayBlankCount      = CONFIRM_FRAMES::REGULAR;
+    unsigned int stableWaterTempCount         = CONFIRM_FRAMES::NOT_BLINKING;
     unsigned int stableBlinkingWaterTempCount = 0;
-    unsigned int stableLedStatusCount         = CONFIRM_FRAMES::LED;
+    unsigned int stableDisinfectionTimeCount  = CONFIRM_FRAMES::REGULAR;
+    unsigned int stableLedStatusCount         = CONFIRM_FRAMES::REGULAR;
 
     uint32 displayValue       = UNDEF::UINT;
     uint32 latestDisplayValue = UNDEF::UINT;
@@ -292,6 +294,9 @@ private:
   };
 
 private:
+  static const uint32 ERROR_NONE = 0;
+
+private:
   // ISR and ISR helper
   static ICACHE_RAM_ATTR void clockRisingISR(void* arg);
   static ICACHE_RAM_ATTR inline void decodeDisplay();
@@ -305,7 +310,7 @@ private:
   static volatile Buttons buttons;
 
 private:
-  uint16 convertDisplayToCelsius(uint32 value) const;
+  int convertDisplayToCelsius(uint32 value) const;
   bool waitBuzzerOff() const;
   bool pressButton(volatile unsigned int& buttonPressCount);
   bool changeWaterTemp(int up);
@@ -323,7 +328,7 @@ private:
 private:
   LANG language;
   unsigned long lastStateUpdateTime = 0;
+  char errorBuffer[4];
 };
 
 #endif /* PURE_SPA_IO_H */
-
