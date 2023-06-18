@@ -286,13 +286,13 @@ Prepare your MQTT server for a new device.
  Topic              | Values                 | Unit | Notes
  ------------------ |:----------------------:|:----:| -----------------------------------
  pool/bubble        | on\|off                |      |
- pool/disinfection  | on\|off                |      | SJB-HS only, experimental
+ pool/disinfection  | 0\|3\|5\|8             | h    | SJB-HS only, 0 h = off
  pool/filter        | on\|off                |      |
  pool/heater        | on\|standby\|off       |      |
  pool/jet           | on\|off                |      | SJB-HS only
  pool/power         | on\|off                |      |
  pool/water/tempAct | int                    | °C   |
- pool/water/tempSet | int                    | °C   |
+ pool/water/tempSet | int                    | °C   | -99 °C at power up until set
  pool/error         | string                 |      | error message (see manual) or empty
  pool/model         | string                 |      | metadata
  wifi/rssi          | int                    | dBm  |

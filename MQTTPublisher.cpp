@@ -130,8 +130,8 @@ void MQTTPublisher::loop()
 
       if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
       {
-        publishIfDefined(MQTT_TOPIC::DISINFECTION, pureSpaIO.isDisinfectionOn(), PureSpaIO::UNDEF::BOOL);
-        publishIfDefined(MQTT_TOPIC::JET,          pureSpaIO.isJetOn(),          PureSpaIO::UNDEF::BOOL);
+        publishIfDefined(MQTT_TOPIC::DISINFECTION, pureSpaIO.isDisinfectionOn()? pureSpaIO.getDisinfectionTime() : 0, (int)PureSpaIO::UNDEF::USHORT);
+        publishIfDefined(MQTT_TOPIC::JET, pureSpaIO.isJetOn(), PureSpaIO::UNDEF::BOOL);
       }
 
       bool b = pureSpaIO.isHeaterOn();
@@ -147,16 +147,16 @@ void MQTTPublisher::loop()
       publishIfDefined("pool/telegram/led", pureSpaIO.getRawLedValue(), PureSpaIO::UNDEF::USHORT);
 #endif
 
-      uint32 errorVal = pureSpaIO.getErrorValue();
-      if (errorVal == 0)
-      {
-        mqttClient.publish(MQTT_TOPIC::STATE, "online", retainAll, forcedStateUpdate);
-      }
-      else
+      String errorCode = pureSpaIO.getErrorCode();
+      if (errorCode.length())
       {
         mqttClient.publish(MQTT_TOPIC::STATE, "error", retainAll, forcedStateUpdate);
       }
-      mqttClient.publish(MQTT_TOPIC::ERROR, pureSpaIO.getErrorMessage(errorVal).c_str(), retainAll);
+      else
+      {
+        mqttClient.publish(MQTT_TOPIC::STATE, "online", retainAll, forcedStateUpdate);
+      }
+      mqttClient.publish(MQTT_TOPIC::ERROR, pureSpaIO.getErrorMessage(errorCode).c_str(), retainAll);
     }
     else
     {
