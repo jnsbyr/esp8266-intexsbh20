@@ -416,14 +416,18 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
     if (isPowerOn() == true && state.error == ERROR_NONE)
     {
       // try to get initial temp
+#ifdef FORCE_WIFI_SLEEP
       WiFi.forceSleepBegin();
+#endif
       int setTemp = getDesiredWaterTempCelsius();
       //DEBUG_MSG("\nBset %d", setTemp);
       bool modifying = false;
       if (setTemp == UNDEF::INT)
       {
         // trigger temp modification
-        //WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#ifndef FORCE_WIFI_SLEEP
+        WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#endif
         changeWaterTemp(-1);
         modifying = true;
 
@@ -436,14 +440,18 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
           setTemp = getDesiredWaterTempCelsius();
           tries--;
         } while (setTemp == UNDEF::INT && tries);
-        //WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#ifndef FORCE_WIFI_SLEEP
+        WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#endif
 
         // check success
         if (setTemp == UNDEF::INT)
         {
           // error, abort
+#ifdef FORCE_WIFI_SLEEP
           WiFi.forceSleepWake();
           delay(1);
+#endif
           DEBUG_MSG("\naborted\n");
           return;
         }
@@ -458,9 +466,13 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         if (deltaTemp > 0)
         {
           //DEBUG_MSG("\nBU");
-          //WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#ifndef FORCE_WIFI_SLEEP
+          WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#endif
           changeWaterTemp(1);
-          //WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#ifndef FORCE_WIFI_SLEEP
+          WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#endif
           if (modifying)
           {
             deltaTemp--;
@@ -470,9 +482,13 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         else
         {
           //DEBUG_MSG("\nBD");
-          //WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#ifndef FORCE_WIFI_SLEEP
+          WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#endif
           changeWaterTemp(-1);
-          //WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#ifndef FORCE_WIFI_SLEEP
+          WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#endif
           if (modifying)
           {
             deltaTemp++;
@@ -481,8 +497,10 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         }
         modifying = true;
       }
+#ifdef FORCE_WIFI_SLEEP
       WiFi.forceSleepWake();
       delay(1);
+#endif
     }
   }
 }
