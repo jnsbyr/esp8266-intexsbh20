@@ -148,13 +148,11 @@ For the [hack](#hacking-the-sb-h20) described above no modification of the
 SB-H20 was needed.
 
 This was good enough for a lab test but not for a permanent solution. To keep the
-required modifications of the pool to a minimum an extension cable is needed to
-attach the WiFi remote control to the Intex control panel. I could not find a
-supplier that sells the Intex plugs separately. But if you have access to a 3D
-printer you should have a look at this 
-[3D model](https://www.thingiverse.com/thing:4130911). Otherwise you need to cut
-and tap the cable from the control panel to the main board.
+required modifications of the pool to a minimum there are 2 options to attach the
+WiFi remote control to the Intex control panel:
 
+- use an extension cable (needs 2 Intex connectors)
+- cut and tap into the control panel cable
 
 ### PCB
 
@@ -177,14 +175,25 @@ circuit and the code.
 Before you make a final decision about the board type read the chapter about
 the [thermometer](#wifi-controller-thermometer) below.
 
-### Case and Cables
+### Case, Cables and Connectors
 
 Select a case that is IP64 or better to protect the circuit from moisture
 and to protect the pool users from electrical shock. The same applies to the
-cables and plugs. For my solution these components were the most expensive
-part of the project at around 30 EUR.
+cables and connectors. These components were the most expensive part of the
+project at around 30 EUR.
+
+As I could not find a supplier that sells the Intex connectors separately I opted
+for the cut & tap option mentioned above:
 
 ![CableTree](assets/CableTree.jpg "modified cable tree of Intex SB-H20 control panel")
+
+If you have access to a 3D printer you can avoid cutting the control panel cable.
+Have a look at theses models:
+
+- [case incl. Intex PureSpa connectors and mechanical attachment](https://www.printables.com/en/model/509289-intex-purespa-whirlpool-controller-electromechanic)
+  for the [PCB](pcb) incl. a detailed assembly info with many photos
+
+- [Intex PureSpa connectors](https://www.thingiverse.com/thing:4130911)
 
 ### Power Supply
 
