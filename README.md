@@ -1,6 +1,6 @@
 # MQTT WiFi remote control for Intex PureSpa whirlpools
 
-[![Build Arduino Sktetch](https://github.com/jnsbyr/esp8266-intexsbh20/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jnsbyr/esp8266-intexsbh20/actions/workflows/build.yml)
+[![-build scetch-](https://github.com/jnsbyr/esp8266-intexsbh20/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jnsbyr/esp8266-intexsbh20/actions/workflows/build.yml)
 
 ### Table of contents
 
@@ -308,16 +308,16 @@ second.
 
 **Subscribed Topics**
 
-| Topic                      | Values  | Unit | Notes
-| -------------------------- |:-------:|:----:| -----------------------------------
-| pool/command/bubble        | on\|off |      |
-| pool/command/disinfection  | on\|off |      | SJB-HS only, experimental
-| pool/command/filter        | on\|off |      |
-| pool/command/heater        | on\|off |      |
-| pool/command/jet           | on\|off |      | SJB-HS only
-| pool/command/power         | on\|off |      |
-| pool/command/water/tempSet | int     | °C   |
-| wifi/command/update        | on      |      | start OTA update
+| Topic                      | Values     | Unit | Notes
+| -------------------------- |:----------:|:----:| -----------------------------------
+| pool/command/bubble        | on\|off    |      |
+| pool/command/disinfection  | 0\|3\|5\|8 | h    | SJB-HS only, 0 h = off
+| pool/command/filter        | on\|off    |      |
+| pool/command/heater        | on\|off    |      |
+| pool/command/jet           | on\|off    |      | SJB-HS only
+| pool/command/power         | on\|off    |      |
+| pool/command/water/tempSet | 20...40    | °C   |
+| wifi/command/update        | on         |      | start OTA update
 
 The *pool* topics are equivalent to the buttons on the control panel of the PureSpa.
 Refer to the user manual for more details.
@@ -330,6 +330,10 @@ the temperature delta.
 If *wifi/state* is *error* you are only allowed to send the command
 *pool/command/power=off*. The PureSpa will continue to beep for a while. To
 clear the error it is necessary to power down the PureSpa.
+
+While changing the temperature or the disinfection time the MQTT connection
+will be interrupted because otherwise the high priority WiFi tasks of the
+ESP8266 would make the time critical PureSpa read/write sequences unreliable.
 
 ### WiFi Controller Thermometer
 

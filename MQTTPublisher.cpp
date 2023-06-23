@@ -130,7 +130,7 @@ void MQTTPublisher::loop()
 
       if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
       {
-        publishIfDefined(MQTT_TOPIC::DISINFECTION, pureSpaIO.isDisinfectionOn()? pureSpaIO.getDisinfectionTime() : 0, (int)PureSpaIO::UNDEF::USHORT);
+        publishIfDefined(MQTT_TOPIC::DISINFECTION, pureSpaIO.getDisinfectionTime(), (int)PureSpaIO::UNDEF::USHORT);
         publishIfDefined(MQTT_TOPIC::JET, pureSpaIO.isJetOn(), PureSpaIO::UNDEF::BOOL);
       }
 

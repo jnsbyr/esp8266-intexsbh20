@@ -109,7 +109,7 @@ void setup()
       mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { pureSpaIO.setDesiredWaterTempCelsius(i); });
       if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
       {
-        mqttClient.addSubscriber(MQTT_TOPIC::CMD_DISINFECTION, [](bool b) -> void { pureSpaIO.setDisinfectionOn(b); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_DISINFECTION, [](int i) -> void { pureSpaIO.setDisinfectionTime(i); });
         mqttClient.addSubscriber(MQTT_TOPIC::CMD_JET,          [](bool b) -> void { pureSpaIO.setJetOn(b); });
       }
 

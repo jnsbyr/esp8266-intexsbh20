@@ -301,7 +301,7 @@ int PureSpaIO::getDesiredWaterTempCelsius() const
  */
 int PureSpaIO::getDisinfectionTime() const
 {
-  return (state.disinfectionTime != UNDEF::UINT) ? display2Num(state.disinfectionTime) : UNDEF::INT;
+  return isDisinfectionOn() ? (state.disinfectionTime != UNDEF::UINT ? display2Num(state.disinfectionTime) : UNDEF::INT) : 0;
 }
 
 String PureSpaIO::getErrorCode() const
@@ -413,12 +413,13 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
 {
   if (temp >= WATER_TEMP::SET_MIN && temp <= WATER_TEMP::SET_MAX)
   {
-    if (isPowerOn() == true && state.error == ERROR_NONE)
+    if (isPowerOn() && state.error == ERROR_NONE)
     {
       // try to get initial temp
 #ifdef FORCE_WIFI_SLEEP
       WiFi.forceSleepBegin();
 #endif
+
       int setTemp = getDesiredWaterTempCelsius();
       //DEBUG_MSG("\nBset %d", setTemp);
       bool modifying = false;
@@ -497,11 +498,65 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         }
         modifying = true;
       }
+
 #ifdef FORCE_WIFI_SLEEP
       WiFi.forceSleepWake();
       delay(1);
 #endif
     }
+  }
+}
+
+/**
+ * set desired disinfection duration by performing button actions
+ * repeatedly until the requested duration is displayed
+ *
+ * notes:
+ * - method will block until setting is completed
+ * - WiFi is temporarily put to sleep to improve receive decoding reliability
+ *
+ * @param hours disinfection duration 0/3/5/8 h
+ */
+void PureSpaIO::setDisinfectionTime(int hours)
+{
+  // use nearest available value
+  if (hours > 5)      hours = 8;
+  else if (hours > 3) hours = 5;
+  else if (hours > 0) hours = 3;
+  else                hours = 0;
+
+  if (isPowerOn() && state.error == ERROR_NONE)
+  {
+#ifdef FORCE_WIFI_SLEEP
+    WiFi.forceSleepBegin();
+#endif
+
+    int tries = 8;
+    do
+    {
+      // get actual disinfection time
+      int actHours = getDisinfectionTime();
+      if (actHours == UNDEF::INT)
+      {
+        // error reading actual time, abort
+        DEBUG_MSG("\naborted\n");
+        break;
+      }
+      else if (actHours == hours)
+      {
+        // set and act time matches, done
+        break;
+      }
+
+      // toggle disinfection time
+      pressButton(buttons.toggleDisinfection);
+      tries--;
+    } while (tries);
+
+#ifdef FORCE_WIFI_SLEEP
+    WiFi.forceSleepWake();
+    delay(1);
+#endif
   }
 }
 
@@ -535,14 +590,6 @@ void PureSpaIO::setBubbleOn(bool on)
   if (on ^ (isBubbleOn() == true))
   {
     pressButton(buttons.toggleBubble);
-  }
-}
-
-void PureSpaIO::setDisinfectionOn(bool on)
-{
-  if (on ^ (isDisinfectionOn() == true))
-  {
-    pressButton(buttons.toggleDisinfection);
   }
 }
 

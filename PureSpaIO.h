@@ -176,9 +176,9 @@ public:
   uint8 isPowerOn() const;
 
   void setDesiredWaterTempCelsius(int temp);
+  void setDisinfectionTime(int hours);
 
   void setBubbleOn(bool on);
-  void setDisinfectionOn(bool on);
   void setFilterOn(bool on);
   void setHeaterOn(bool on);
   void setJetOn(bool on);
