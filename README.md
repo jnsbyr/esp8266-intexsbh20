@@ -1,5 +1,6 @@
 # MQTT WiFi remote control for Intex PureSpa whirlpools
 
+[![Build Arduino Sktetch](https://github.com/jnsbyr/esp8266-intexsbh20/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jnsbyr/esp8266-intexsbh20/actions/workflows/build.yml)
 
 ### Table of contents
 
