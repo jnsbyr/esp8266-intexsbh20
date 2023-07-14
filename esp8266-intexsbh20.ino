@@ -132,7 +132,7 @@ void setup()
         username = config.get(CONFIG_TAG::MQTT_USER);
         password = config.get(CONFIG_TAG::MQTT_PASSWORD);
       }
-      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
+      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_PORT), username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
