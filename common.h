@@ -43,7 +43,7 @@
 // if changing the water temperature setpoint does not work reliably, commenting
 // in the following option may improve the behaviour at the cost of a short
 // disconnect to the MQTT server
-#define FORCE_WIFI_SLEEP
+//#define FORCE_WIFI_SLEEP
 
 //#define SERIAL_DEBUG
 
@@ -51,7 +51,7 @@
 
 namespace CONFIG
 {
-  const char WIFI_VERSION[] = "1.0.5.2"; // 23.06.2023
+  const char WIFI_VERSION[] = "1.0.6.0"; // 23.07.2023
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot

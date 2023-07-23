@@ -227,7 +227,7 @@ private:
   class BUTTON
   {
   public:
-    static const unsigned int PRESS_COUNT       = BLINK::PERIOD/CYCLE::PERIOD - 2; // must be long enough to trigger, but short enough to avoid double trigger
+    static const unsigned int PRESS_COUNT       = BLINK::PERIOD/CYCLE::PERIOD - 4; // must be long enough to trigger, but short enough to avoid double trigger
     static const unsigned int ACK_CHECK_PERIOD  = 10; // ms
     static const unsigned int ACK_TIMEOUT       = 2*PRESS_COUNT*CYCLE::PERIOD; // ms
   };

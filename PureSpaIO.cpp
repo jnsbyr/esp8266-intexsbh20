@@ -415,20 +415,15 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
   {
     if (isPowerOn() && state.error == ERROR_NONE)
     {
-      // try to get initial temp
 #ifdef FORCE_WIFI_SLEEP
+      // try to get initial temp
       WiFi.forceSleepBegin();
-#endif
-
       int setTemp = getDesiredWaterTempCelsius();
       //DEBUG_MSG("\nBset %d", setTemp);
       bool modifying = false;
       if (setTemp == UNDEF::INT)
       {
         // trigger temp modification
-#ifndef FORCE_WIFI_SLEEP
-        WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
-#endif
         changeWaterTemp(-1);
         modifying = true;
 
@@ -441,18 +436,13 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
           setTemp = getDesiredWaterTempCelsius();
           tries--;
         } while (setTemp == UNDEF::INT && tries);
-#ifndef FORCE_WIFI_SLEEP
-        WiFi.setSleepMode(WIFI_NONE_SLEEP);
-#endif
 
         // check success
         if (setTemp == UNDEF::INT)
         {
           // error, abort
-#ifdef FORCE_WIFI_SLEEP
           WiFi.forceSleepWake();
           delay(1);
-#endif
           DEBUG_MSG("\naborted\n");
           return;
         }
@@ -467,13 +457,7 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         if (deltaTemp > 0)
         {
           //DEBUG_MSG("\nBU");
-#ifndef FORCE_WIFI_SLEEP
-          WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
-#endif
           changeWaterTemp(1);
-#ifndef FORCE_WIFI_SLEEP
-          WiFi.setSleepMode(WIFI_NONE_SLEEP);
-#endif
           if (modifying)
           {
             deltaTemp--;
@@ -483,13 +467,7 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         else
         {
           //DEBUG_MSG("\nBD");
-#ifndef FORCE_WIFI_SLEEP
-          WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
-#endif
           changeWaterTemp(-1);
-#ifndef FORCE_WIFI_SLEEP
-          WiFi.setSleepMode(WIFI_NONE_SLEEP);
-#endif
           if (modifying)
           {
             deltaTemp++;
@@ -499,9 +477,56 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         modifying = true;
       }
 
-#ifdef FORCE_WIFI_SLEEP
       WiFi.forceSleepWake();
       delay(1);
+#else
+      // trigger temp modification
+      changeWaterTemp(-1);
+
+      int sleep = 100; // ms
+      int changeTries = WATER_TEMP::SET_MAX - WATER_TEMP::SET_MIN + 3;
+      int setTemp = UNDEF::INT;
+      do
+      {
+        // wait for temp readback (will take 2-3 blink durations)
+        int readTries = 5*BLINK::PERIOD/sleep;
+        int newSetTemp = UNDEF::INT;
+        ESP.wdtFeed();
+        delay(BLINK::PERIOD);
+        do
+        {
+          delay(sleep);
+          newSetTemp = getDesiredWaterTempCelsius();
+          readTries--;
+        } while (newSetTemp == setTemp && readTries);
+        DEBUG_MSG("\nst:%d (rt:%d)", newSetTemp, readTries);
+
+        // check success
+        if (newSetTemp == UNDEF::INT)
+        {
+          // error, abort
+          DEBUG_MSG("\naborted\n");
+          return;
+        }
+        else
+        {
+          // success, check direction and change
+          setTemp = newSetTemp;
+          if (temp > setTemp)
+          {
+            if (!changeWaterTemp(+1))
+              changeWaterTemp(+1);
+            changeTries--;
+          }
+          else if (temp < setTemp)
+          {
+            if (!changeWaterTemp(-1))
+              changeWaterTemp(-1);
+            changeTries--;
+          }
+        }
+      } while (temp != setTemp && changeTries);
+      DEBUG_MSG("\ncT:%d", changeTries);
 #endif
     }
   }
@@ -662,11 +687,14 @@ bool PureSpaIO::waitBuzzerOff() const
  */
 bool PureSpaIO::changeWaterTemp(int up)
 {
-  if (isPowerOn() == true && state.error == ERROR_NONE)
+  if (isPowerOn() && state.error == ERROR_NONE)
   {
     // perform button action
     waitBuzzerOff();
     //DEBUG_MSG("\nP ");
+#ifndef FORCE_WIFI_SLEEP
+    WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
+#endif
     int tries = BUTTON::ACK_TIMEOUT/BUTTON::ACK_CHECK_PERIOD;
     if (up > 0)
     {
@@ -686,6 +714,9 @@ bool PureSpaIO::changeWaterTemp(int up)
         tries--;
       }
     }
+#ifndef FORCE_WIFI_SLEEP
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#endif
 
     if (tries && state.buzzer)
     {
@@ -722,9 +753,9 @@ int PureSpaIO::convertDisplayToCelsius(uint32 value) const
 ICACHE_RAM_ATTR void PureSpaIO::clockRisingISR(void* arg)
 {
   bool data = !digitalRead(PIN::DATA);
-  bool enable = digitalRead(PIN::LATCH) == LOW;
+  bool enabled = !digitalRead(PIN::LATCH);
 
-  if (enable || isrState.receivedBits == (FRAME::BITS - 1))
+  if (enabled || isrState.receivedBits == (FRAME::BITS - 1))
   {
     isrState.frameValue = (isrState.frameValue << 1) + data;
     isrState.receivedBits++;
@@ -1133,8 +1164,15 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
     //DEBUG_MSG("U");
     if (buttons.toggleTempUp)
     {
-      isrState.reply = true;
-      buttons.toggleTempUp--;
+      if (state.buzzer)
+      {
+        buttons.toggleTempUp = 0;
+      }
+      else
+      {
+        isrState.reply = true;
+        buttons.toggleTempUp--;
+      }
     }
   }
   else if (isrState.frameValue & FRAME_BUTTON::TEMP_DOWN)
@@ -1142,8 +1180,15 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
     //DEBUG_MSG("D");
     if (buttons.toggleTempDown)
     {
-      isrState.reply = true;
-      buttons.toggleTempDown--;
+      if (state.buzzer)
+      {
+        buttons.toggleTempDown = 0;
+      }
+      else
+      {
+        isrState.reply = true;
+        buttons.toggleTempDown--;
+      }
     }
   }
 #ifdef MODEL_SJB_HS
@@ -1176,11 +1221,11 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
   if (isrState.reply)
   {
     // delay around 5 µs relative to rising edge of latch signal before pulsing
-    // pulse should be around 2 µs and must be completed before next falling edge of clock
+    // pulse should be around 2 µs and MUST be completed BEFORE next falling edge of clock
 #if F_CPU == 160000000L
     delayMicroseconds(1);
     pinMode(PIN::DATA, OUTPUT);
-    delayMicroseconds(3);
+    delayMicroseconds(2);
     pinMode(PIN::DATA, INPUT);
 #else
     #error 160 MHz CPU frequency required! Pulse timing not possible at 80 MHz, because the code above takes too long to reach this point.
