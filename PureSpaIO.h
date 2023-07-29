@@ -77,33 +77,34 @@
  *
  * telegram order:
  *
- * 32 frames, repeating every 21 ms (5x digit 1-4, 5x LEDs, 1x buttons 1-7)
+ * 25 cue frames and 32/34 data frames (5x digit 1-4, 5x LEDs, 1x buttons 1-7/9), repeating every 21 ms
  *
- * CD1
- * CD2
- * CD3
- * CD4
- * CL
- * CD1
- * CD2
- * CD3
- * CD4
- * CL
- * CD1
- * CD2
- * CD3
- * CD4
- * CL
- * CD1
- * CD2
- * CD3
- * CD4
- * CL
- * CD1
- * CD2
- * CD3
- * CD4
- * CBBBBBBBL
+ * C D1
+ * C D2
+ * C D3
+ * C D4
+ * C L
+ * C D1
+ * C D2
+ * C D3
+ * C D4
+ * C L
+ * C D1
+ * C D2
+ * C D3
+ * C D4
+ * C L
+ * C D1
+ * C D2
+ * C D3
+ * C D4
+ * C L
+ * C D1
+ * C D2
+ * C D3
+ * C D4
+ * C BBBBBBB L   [SB-H20]
+ * C BBBBBBBBB L [SJB-HS]
  *
  *
  * Build Notes:
@@ -196,40 +197,46 @@ private:
   class CYCLE
   {
   public:
-    static const unsigned int TOTAL_FRAMES    = 32; // number of frames in each cycle
-    static const unsigned int DISPLAY_FRAMES  = 5;  // number of digit frame groups in each cycle
-    static const unsigned int PERIOD          = 21; // ms, period of frame cycle
+#if defined MODEL_SB_H20
+    static const unsigned int BUTTON_FRAMES = 7; // number of button frames in each cycle
+#elif defined MODEL_SJB_HS
+    static const unsigned int BUTTON_FRAMES = 9; // number of button frames in each cycle
+#endif
+    static const unsigned int TOTAL_FRAMES = 25 + BUTTON_FRAMES; // number of frames in each cycle
+    static const unsigned int DISPLAY_FRAME_GROUPS =  5; // number of digit frame groups in each cycle
+    static const unsigned int PERIOD = 21; // ms, period of frame cycle @todo might be longer for SJB-HS
     static const unsigned int RECEIVE_TIMEOUT = 50*CYCLE::PERIOD; // ms
   };
 
   class FRAME
   {
   public  :
-    static const unsigned int BITS = 16;
+    static const unsigned int BITS = 16; // bits per frame
     static const unsigned int FREQUENCY = CYCLE::TOTAL_FRAMES/CYCLE::PERIOD; // frames/ms
   };
 
   class BLINK
   {
   public:
-    static const unsigned int PERIOD         = 500; // ms, temp will blink 8 times in 4000 ms
-    static const unsigned int TEMP_FRAMES    = PERIOD/4*FRAME::FREQUENCY; // sample duration of desired temp after blank display
+    static const unsigned int PERIOD = 500; // ms, temp will blink 8 times in 4000 ms
+    static const unsigned int TEMP_FRAMES = PERIOD/4*FRAME::FREQUENCY; // sample duration of desired temp after blank display
     static const unsigned int STOPPED_FRAMES = 2*PERIOD*FRAME::FREQUENCY; // must be longer than single blink duration
   };
 
   class CONFIRM_FRAMES
   {
   public:
-    static const unsigned int REGULAR      = 3; // ms, for values which do not blink
-    static const unsigned int NOT_BLINKING = BLINK::PERIOD/2*FRAME::FREQUENCY/CYCLE::DISPLAY_FRAMES; // ms, must be high enough to tell from blinking
+    static const unsigned int REGULAR = 3; // frames, for values which do not blink
+    static const unsigned int NOT_BLINKING = BLINK::PERIOD/2*FRAME::FREQUENCY/CYCLE::DISPLAY_FRAME_GROUPS; // frames, must be high enough to tell from blinking
   };
 
   class BUTTON
   {
   public:
-    static const unsigned int PRESS_COUNT       = BLINK::PERIOD/CYCLE::PERIOD - 4; // must be long enough to trigger, but short enough to avoid double trigger
-    static const unsigned int ACK_CHECK_PERIOD  = 10; // ms
-    static const unsigned int ACK_TIMEOUT       = 2*PRESS_COUNT*CYCLE::PERIOD; // ms
+    static const unsigned int PRESS_COUNT = BLINK::PERIOD/CYCLE::PERIOD; // cycles, must be long enough to activate buzzer
+    static const unsigned int PRESS_SHORT_COUNT = 340/CYCLE::PERIOD; // cycles, must be long enough to trigger, but short enough to avoid double trigger
+    static const unsigned int ACK_CHECK_PERIOD = 10; // ms
+    static const unsigned int ACK_TIMEOUT = 2*PRESS_COUNT*CYCLE::PERIOD; // ms
   };
 
 private:
@@ -302,6 +309,7 @@ private:
   static ICACHE_RAM_ATTR inline void decodeDisplay();
   static ICACHE_RAM_ATTR inline void decodeLED();
   static ICACHE_RAM_ATTR inline void decodeButton();
+  static ICACHE_RAM_ATTR inline void updateButtonState(volatile unsigned int& buttonPressCount);
 
 private:
   // ISR variables

@@ -484,7 +484,7 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
       changeWaterTemp(-1);
 
       int sleep = 100; // ms
-      int changeTries = WATER_TEMP::SET_MAX - WATER_TEMP::SET_MIN + 3;
+      int changeTries = 3;
       int setTemp = UNDEF::INT;
       do
       {
@@ -492,7 +492,6 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         int readTries = 5*BLINK::PERIOD/sleep;
         int newSetTemp = UNDEF::INT;
         ESP.wdtFeed();
-        delay(BLINK::PERIOD);
         do
         {
           delay(sleep);
@@ -510,18 +509,22 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
         }
         else
         {
-          // success, check direction and change
+          // update change tries based on inital delta
+          if (setTemp == UNDEF::INT)
+          {
+            changeTries += abs(newSetTemp - temp);
+          }
+
+          // change temperature by 1 degree
           setTemp = newSetTemp;
           if (temp > setTemp)
           {
-            if (!changeWaterTemp(+1))
-              changeWaterTemp(+1);
+            changeWaterTemp(+1);
             changeTries--;
           }
           else if (temp < setTemp)
           {
-            if (!changeWaterTemp(-1))
-              changeWaterTemp(-1);
+            changeWaterTemp(-1);
             changeTries--;
           }
         }
@@ -682,6 +685,9 @@ bool PureSpaIO::waitBuzzerOff() const
 /**
  * change water temperature setpoint by 1 degree and wait for confirmation (blocking)
  *
+ * notes:
+ * - WiFi is temporarily put to sleep to improve receive decoding reliability
+ *
  * @param up press up (> 0) or down (< 0) button
  * @return true if beep was received, false if no beep was received until timeout
  */
@@ -689,36 +695,49 @@ bool PureSpaIO::changeWaterTemp(int up)
 {
   if (isPowerOn() && state.error == ERROR_NONE)
   {
-    // perform button action
     waitBuzzerOff();
     //DEBUG_MSG("\nP ");
+
 #ifndef FORCE_WIFI_SLEEP
     WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
 #endif
-    int tries = BUTTON::ACK_TIMEOUT/BUTTON::ACK_CHECK_PERIOD;
+
+    // perform button action
+    int tries = BUTTON::PRESS_SHORT_COUNT*CYCLE::PERIOD/BUTTON::ACK_CHECK_PERIOD;
     if (up > 0)
     {
-      buttons.toggleTempUp = BUTTON::PRESS_COUNT;
+      buttons.toggleTempUp = BUTTON::PRESS_SHORT_COUNT;
       while (buttons.toggleTempUp && tries)
       {
         delay(BUTTON::ACK_CHECK_PERIOD);
         tries--;
       }
+      buttons.toggleTempUp = 0;
     }
     else if (up < 0)
     {
-      buttons.toggleTempDown = BUTTON::PRESS_COUNT;
+      buttons.toggleTempDown = BUTTON::PRESS_SHORT_COUNT;
       while (buttons.toggleTempDown && tries)
       {
         delay(BUTTON::ACK_CHECK_PERIOD);
         tries--;
       }
+      buttons.toggleTempDown = 0;
     }
+
+    // wait for buzzer
+    tries = (BUTTON::PRESS_COUNT - BUTTON::PRESS_SHORT_COUNT)*CYCLE::PERIOD/BUTTON::ACK_CHECK_PERIOD;
+    while (!state.buzzer && tries)
+    {
+      delay(BUTTON::ACK_CHECK_PERIOD);
+      tries--;
+    }
+
 #ifndef FORCE_WIFI_SLEEP
     WiFi.setSleepMode(WIFI_NONE_SLEEP);
 #endif
 
-    if (tries && state.buzzer)
+    if (state.buzzer)
     {
       return true;
     }
@@ -1117,96 +1136,62 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeLED()
   }
 }
 
+ICACHE_RAM_ATTR inline void PureSpaIO::updateButtonState(volatile unsigned int& buttonPressCount)
+{
+  if (buttonPressCount)
+  {
+    if (state.buzzer)
+    {
+      buttonPressCount = 0;
+    }
+    else
+    {
+      isrState.reply = true;
+      buttonPressCount--;
+    }
+  }
+}
+
 ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
 {
   if (isrState.frameValue & FRAME_BUTTON::FILTER)
   {
     //DEBUG_MSG("F");
-    if (buttons.toggleFilter)
-    {
-      isrState.reply = true;
-      buttons.toggleFilter--;
-    }
+    updateButtonState(buttons.toggleFilter);
   }
   else if (isrState.frameValue & FRAME_BUTTON::HEATER)
   {
     //DEBUG_MSG("H");
-    if (buttons.toggleHeater)
-    {
-      isrState.reply = true;
-      buttons.toggleHeater--;
-    }
+    updateButtonState(buttons.toggleHeater);
   }
   else if (isrState.frameValue & FRAME_BUTTON::BUBBLE)
   {
     //DEBUG_MSG("B");
-    if (buttons.toggleBubble)
-    {
-      isrState.reply = true;
-      buttons.toggleBubble--;
-      //if (!buttons.toggleBubble)
-      //{
-      //  DEBUG_MSG("\nFBO");
-      //}
-    }
+    updateButtonState(buttons.toggleBubble);
   }
   else if (isrState.frameValue & FRAME_BUTTON::POWER)
   {
     //DEBUG_MSG(" P");
-    if (buttons.togglePower)
-    {
-      isrState.reply = true;
-      buttons.togglePower--;
-    }
+    updateButtonState(buttons.togglePower);
   }
   else if (isrState.frameValue & FRAME_BUTTON::TEMP_UP)
   {
     //DEBUG_MSG("U");
-    if (buttons.toggleTempUp)
-    {
-      if (state.buzzer)
-      {
-        buttons.toggleTempUp = 0;
-      }
-      else
-      {
-        isrState.reply = true;
-        buttons.toggleTempUp--;
-      }
-    }
+    updateButtonState(buttons.toggleTempUp);
   }
   else if (isrState.frameValue & FRAME_BUTTON::TEMP_DOWN)
   {
     //DEBUG_MSG("D");
-    if (buttons.toggleTempDown)
-    {
-      if (state.buzzer)
-      {
-        buttons.toggleTempDown = 0;
-      }
-      else
-      {
-        isrState.reply = true;
-        buttons.toggleTempDown--;
-      }
-    }
+    updateButtonState(buttons.toggleTempDown);
   }
 #ifdef MODEL_SJB_HS
   else if (isrState.frameValue & FRAME_BUTTON::DISINFECTION)
   {
-    if (buttons.toggleDisinfection)
-    {
-      isrState.reply = true;
-      buttons.toggleDisinfection--;
-    }
+    updateButtonState(buttons.toggleDisinfection);
   }
   else if (isrState.frameValue & FRAME_BUTTON::JET)
   {
-    if (buttons.toggleJet)
-    {
-      isrState.reply = true;
-      buttons.toggleJet--;
-    }
+    updateButtonState(buttons.toggleJet);
   }
 #endif
   else if (isrState.frameValue & FRAME_BUTTON::TEMP_UNIT)
