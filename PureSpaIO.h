@@ -234,7 +234,7 @@ private:
   {
   public:
     static const unsigned int PRESS_COUNT = BLINK::PERIOD/CYCLE::PERIOD; // cycles, must be long enough to activate buzzer
-    static const unsigned int PRESS_SHORT_COUNT = 340/CYCLE::PERIOD; // cycles, must be long enough to trigger, but short enough to avoid double trigger
+    static const unsigned int PRESS_SHORT_COUNT = 380/CYCLE::PERIOD; // cycles, must be long enough to trigger, but short enough to avoid double trigger
     static const unsigned int ACK_CHECK_PERIOD = 10; // ms
     static const unsigned int ACK_TIMEOUT = 2*PRESS_COUNT*CYCLE::PERIOD; // ms
   };

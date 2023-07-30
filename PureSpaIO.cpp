@@ -481,23 +481,38 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
       delay(1);
 #else
       // trigger temp modification
-      changeWaterTemp(-1);
+      if (!changeWaterTemp(-1))
+      {
+        changeWaterTemp(+1);
+      }
 
-      int sleep = 100; // ms
+      int sleep = 5*CYCLE::PERIOD; // ms
       int changeTries = 3;
       int setTemp = UNDEF::INT;
+      bool getActualSetpoint = true;
       do
       {
-        // wait for temp readback (will take 2-3 blink durations)
-        int readTries = 5*BLINK::PERIOD/sleep;
-        int newSetTemp = UNDEF::INT;
+        // get actual temperature setpoint (will take 2-3 blink durations, especially inital) but skip when change has failed
+        int readTries = 4*BLINK::PERIOD/sleep;
+        int newSetTemp = getActualSetpoint? UNDEF::INT : setTemp;
         ESP.wdtFeed();
-        do
+        if (getActualSetpoint)
         {
-          delay(sleep);
+          // always wait after change, especially to catch double trigger
+          waitBuzzerOff();
+          delay(BLINK::PERIOD);
+        }
+        while (getActualSetpoint)
+        {
           newSetTemp = getDesiredWaterTempCelsius();
           readTries--;
-        } while (newSetTemp == setTemp && readTries);
+          getActualSetpoint = newSetTemp == setTemp && readTries;
+          if (getActualSetpoint)
+          {
+            // only wait when not done
+            delay(sleep);
+          }
+        }
         DEBUG_MSG("\nst:%d (rt:%d)", newSetTemp, readTries);
 
         // check success
@@ -513,18 +528,19 @@ void PureSpaIO::setDesiredWaterTempCelsius(int temp)
           if (setTemp == UNDEF::INT)
           {
             changeTries += abs(newSetTemp - temp);
+            changeTries += changeTries/10;
           }
 
           // change temperature by 1 degree
           setTemp = newSetTemp;
           if (temp > setTemp)
           {
-            changeWaterTemp(+1);
+            getActualSetpoint = changeWaterTemp(+1);
             changeTries--;
           }
           else if (temp < setTemp)
           {
-            changeWaterTemp(-1);
+            getActualSetpoint = changeWaterTemp(-1);
             changeTries--;
           }
         }
@@ -599,18 +615,19 @@ void PureSpaIO::setDisinfectionTime(int hours)
  */
 bool PureSpaIO::pressButton(volatile unsigned int& buttonPressCount)
 {
-  WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
   waitBuzzerOff();
   unsigned int tries = BUTTON::ACK_TIMEOUT/BUTTON::ACK_CHECK_PERIOD;
+  WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
   buttonPressCount = BUTTON::PRESS_COUNT;
   while (buttonPressCount && tries)
   {
     delay(BUTTON::ACK_CHECK_PERIOD);
     tries--;
   }
+  bool success = state.buzzer;
   WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  return tries;
+  return success;
 }
 
 void PureSpaIO::setBubbleOn(bool on)
@@ -693,10 +710,12 @@ bool PureSpaIO::waitBuzzerOff() const
  */
 bool PureSpaIO::changeWaterTemp(int up)
 {
+  bool success = false;
+
   if (isPowerOn() && state.error == ERROR_NONE)
   {
-    waitBuzzerOff();
     //DEBUG_MSG("\nP ");
+    waitBuzzerOff();
 
 #ifndef FORCE_WIFI_SLEEP
     WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
@@ -725,7 +744,7 @@ bool PureSpaIO::changeWaterTemp(int up)
       buttons.toggleTempDown = 0;
     }
 
-    // wait for buzzer
+    // wait for buzzer on
     tries = (BUTTON::PRESS_COUNT - BUTTON::PRESS_SHORT_COUNT)*CYCLE::PERIOD/BUTTON::ACK_CHECK_PERIOD;
     while (!state.buzzer && tries)
     {
@@ -733,21 +752,19 @@ bool PureSpaIO::changeWaterTemp(int up)
       tries--;
     }
 
+    success = state.buzzer;
+
 #ifndef FORCE_WIFI_SLEEP
     WiFi.setSleepMode(WIFI_NONE_SLEEP);
 #endif
 
-    if (state.buzzer)
-    {
-      return true;
-    }
-    else
+    if (!success)
     {
       DEBUG_MSG("\ncWT fail");
     }
   }
 
-  return false;
+  return success;
 }
 
 int PureSpaIO::convertDisplayToCelsius(uint32 value) const
@@ -1210,7 +1227,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
 #if F_CPU == 160000000L
     delayMicroseconds(1);
     pinMode(PIN::DATA, OUTPUT);
-    delayMicroseconds(2);
+    delayMicroseconds(3);
     pinMode(PIN::DATA, INPUT);
 #else
     #error 160 MHz CPU frequency required! Pulse timing not possible at 80 MHz, because the code above takes too long to reach this point.
