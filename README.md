@@ -414,7 +414,9 @@ client library currently does not support it.
 
 ## Contributing
 
-If you want something clarified or improved you may raise an [issue](https://github.com/jnsbyr/esp8266-intexsbh20).
+If you want to contribute to this project, please have look at the 
+[contributing guide](CONTRIBUTING.md) first. It will provide guidelines for 
+creating [issues](issues) and [merge requests](pulls).
 
 
 ## Licenses and Credits
