@@ -221,17 +221,19 @@ PureSpa should have the reserve for this case.
 ### Firmware
 
 Select your Intex PureSpa model based on the table in the 
-[compatibility list](#compatibility) and comment in the corresponding *#define*
+[compatibility list](#compatibility) and comment in the corresponding *#define MODEL_XXX_YYY*
 at the beginning of the file [common.h].
+
+If changing the water temperature does not work reliably for you, rebuild the firmware after commenting in *#define FORCE_WIFI_SLEEP* to use the "original" method where the WiFi will be disabled while changing the temperature. Note that this will also interrupt the TCP/IP connection to the MQTT server.
 
 The following **components** are required to build the firmware:
 
  Component    | Version | Notes
  ------------ |:------- |:-------------------------------------------------------------------------------------------------------
- Arduino IDE  | 1.8     | firmware does not build successfully with 2.X, see [issue #30](../../issues/30)
+ Arduino IDE  | 1.8     | firmware does not build successfully with Arduino IDE 2.X, see [issue #30](../../issues/30)
  ESP8266 SDK  | 2.7.4   | install using the Arduino board manager,<br/>3.1.2 is also reported to work, see [issue #13](../../issues/13)
  ArduinoJSON  | 6.19.4  | install using the Arduino library manager
- PubSubClient | 2.8     | install using the Arduino library manager
+ PubSubClient | 2.8     | install using the Arduino library manager, compiler warnings can be ignored
  
 Other versions may also work but are not tested.
 
@@ -330,10 +332,6 @@ the temperature delta.
 If *wifi/state* is *error* you are only allowed to send the command
 *pool/command/power=off*. The PureSpa will continue to beep for a while. To
 clear the error it is necessary to power down the PureSpa.
-
-While changing the temperature or the disinfection time the MQTT connection
-will be interrupted because otherwise the high priority WiFi tasks of the
-ESP8266 would make the time critical PureSpa read/write sequences unreliable.
 
 ### WiFi Controller Thermometer
 
