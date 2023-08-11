@@ -257,13 +257,16 @@ Example:
  "wifiSSID":       "WiFi-SSID",
  "wifiPassphrase": "WiFi-secret",
  "mqttServer":     "mqtt.at.home",
- "mqttUser":       "leave blank if you don't need authentication",
- "mqttPassword":   "leave blank if you don't need authentication",
+ "mqttPort":       "1883",
+ "mqttUser":       "userName",
+ "mqttPassword":   "password",
  "mqttRetain":     "no",
  "firmwareURL":    "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
  "errorLanguage":  "EN"
 }
 ```
+
+The config entry *mqttPort* can be omitted and defaults to 1883.
 
 If *mqttUser* is omitted no authentication is used for the MQTT connection and
 *mqttPassword* can also be omitted.

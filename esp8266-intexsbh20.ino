@@ -67,6 +67,7 @@ MQTTClient mqttClient;
 MQTTPublisher mqttPublisher(mqttClient, pureSpaIO, thermometer);
 String username;
 String password;
+String mqttPort;
 
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
@@ -132,7 +133,16 @@ void setup()
         username = config.get(CONFIG_TAG::MQTT_USER);
         password = config.get(CONFIG_TAG::MQTT_PASSWORD);
       }
-      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), config.get(CONFIG_TAG::MQTT_PORT), username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
+      uint16 mqttPort;
+      if (config.exists(CONFIG_TAG::MQTT_PORT))
+      {
+        mqttPort = atoi(config.get(CONFIG_TAG::MQTT_PORT));
+      }
+      else
+      {
+        mqttPort = 1883;
+      }
+      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), mqttPort, username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
 
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f

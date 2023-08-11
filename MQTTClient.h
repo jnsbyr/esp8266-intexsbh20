@@ -47,12 +47,12 @@ public:
   void addSubscriber(const char* topic, void (*setter)(bool value));
   void addSubscriber(const char* topic, void (*setter)(int value));
 
-  void setup(const char* mqttServer, const char* mqttPort, const char* mqttUsername, const char* mqttPassword,const char* clientId, const char* willTopic, const char* willMessage);
+  void setup(const char* mqttServer, uint16 mqttPort, const char* mqttUsername, const char* mqttPassword,const char* clientId, const char* willTopic, const char* willMessage);
   void loop();
 
   bool isConnected();
   bool publish(const char* topic, const String& payload, bool retain=false, bool force=false);
-  
+
 private:
   static const unsigned int RECONNECT_DELAY = 3000; // [ms]
 
