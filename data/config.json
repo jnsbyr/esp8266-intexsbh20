@@ -2,6 +2,7 @@
  "wifiSSID":       "WiFi-SSID",
  "wifiPassphrase": "WiFi-Secret",
  "mqttServer":     "mqtt.at.home",
+ "mqttPort":       "1883",
  "mqttUser":       "leave blank if you don't have authentication",
  "mqttPassword":   "leave blank if you don't have authentication",
  "mqttRetain":     "no",
