@@ -786,7 +786,7 @@ int PureSpaIO::convertDisplayToCelsius(uint32 value) const
   return (celsiusValue >= 0) && (celsiusValue <= 60) ? celsiusValue : UNDEF::INT;
 }
 
-ICACHE_RAM_ATTR void PureSpaIO::clockRisingISR(void* arg)
+IRAM_ATTR void PureSpaIO::clockRisingISR(void* arg)
 {
   bool data = !digitalRead(PIN::DATA);
   bool enabled = !digitalRead(PIN::LATCH);
@@ -839,7 +839,7 @@ ICACHE_RAM_ATTR void PureSpaIO::clockRisingISR(void* arg)
   }
 }
 
-ICACHE_RAM_ATTR inline void PureSpaIO::decodeDisplay()
+IRAM_ATTR inline void PureSpaIO::decodeDisplay()
 {
   char digit;
   switch (isrState.frameValue & FRAME_DIGIT::SEGMENTS)
@@ -1153,7 +1153,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::decodeLED()
   }
 }
 
-ICACHE_RAM_ATTR inline void PureSpaIO::updateButtonState(volatile unsigned int& buttonPressCount)
+IRAM_ATTR inline void PureSpaIO::updateButtonState(volatile unsigned int& buttonPressCount)
 {
   if (buttonPressCount)
   {
@@ -1169,7 +1169,7 @@ ICACHE_RAM_ATTR inline void PureSpaIO::updateButtonState(volatile unsigned int& 
   }
 }
 
-ICACHE_RAM_ATTR inline void PureSpaIO::decodeButton()
+IRAM_ATTR inline void PureSpaIO::decodeButton()
 {
   if (isrState.frameValue & FRAME_BUTTON::FILTER)
   {

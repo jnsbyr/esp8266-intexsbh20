@@ -305,11 +305,11 @@ private:
 
 private:
   // ISR and ISR helper
-  static ICACHE_RAM_ATTR void clockRisingISR(void* arg);
-  static ICACHE_RAM_ATTR inline void decodeDisplay();
-  static ICACHE_RAM_ATTR inline void decodeLED();
-  static ICACHE_RAM_ATTR inline void decodeButton();
-  static ICACHE_RAM_ATTR inline void updateButtonState(volatile unsigned int& buttonPressCount);
+  static IRAM_ATTR void clockRisingISR(void* arg);
+  static IRAM_ATTR inline void decodeDisplay();
+  static IRAM_ATTR inline void decodeLED();
+  static IRAM_ATTR inline void decodeButton();
+  static IRAM_ATTR inline void updateButtonState(volatile unsigned int& buttonPressCount);
 
 private:
   // ISR variables
