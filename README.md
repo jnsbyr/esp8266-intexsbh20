@@ -25,7 +25,7 @@ supports other models:
  Intex PureSpa SJB-HS   | MODEL_SJB_HS | supported, see [issue #13](../../issues/13)
  Intex PureSpa SSP-H    | MODEL_SJB_HS | not tested [^2]
 
-[^1]: #define required for build (see common.h)
+[^1]: #define required for build (see [common.h](src/esp8266-intexsbh20/common.h))
 [^2]: should be partially compatible, could be supported
 
 
@@ -222,9 +222,12 @@ PureSpa should have the reserve for this case.
 
 Select your Intex PureSpa model based on the table in the 
 [compatibility list](#compatibility) and comment in the corresponding *#define MODEL_XXX_YYY*
-at the beginning of the file [common.h].
+at the beginning of the file [common.h](src/esp8266-intexsbh20/common.h).
 
-If changing the water temperature does not work reliably for you, rebuild the firmware after commenting in *#define FORCE_WIFI_SLEEP* to use the "original" method where the WiFi will be disabled while changing the temperature. Note that this will also interrupt the TCP/IP connection to the MQTT server.
+If changing the water temperature does not work reliably for you, rebuild the
+firmware after commenting in *#define FORCE_WIFI_SLEEP* to use the "original"
+method where the WiFi will be disabled while changing the temperature. Note that
+this will also interrupt the TCP/IP connection to the MQTT server.
 
 The following **components** are required to build the firmware:
 
@@ -237,11 +240,14 @@ The following **components** are required to build the firmware:
  
 Other versions may also work but are not tested.
 
-The required **board settings** are documented at the top of the INO file. Make sure
-to configure them in the Arduino IDE before building.
+The required **board settings** are documented at the top of the INO file. Make
+sure to configure them in the Arduino IDE before building.
 
 Note that the firmware uses DHCP and the MQTT server is addressed by hostname.
 If you prefer static IPs you must modify the firmware appropriately.
+
+As an alternative to the Arduino IDE you can use Microsoft Visual Studio Code
+with the Arduino Extension and the Arduino CLI to build the firmware.
 
 ### Configuration
 
