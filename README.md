@@ -246,8 +246,11 @@ sure to configure them in the Arduino IDE before building.
 Note that the firmware uses DHCP and the MQTT server is addressed by hostname.
 If you prefer static IPs you must modify the firmware appropriately.
 
-As an alternative to the Arduino IDE you can use Microsoft Visual Studio Code
-with the Arduino Extension and the Arduino CLI to build the firmware.
+As an alternative to the Arduino IDE you can use Microsoft Visual Studio Code with one of the following extensions to build the firmware:
+
+- [Visual Studio Code extension for Arduino](https://github.com/microsoft/vscode-arduino) and the
+  [Arduino CLI](https://github.com/arduino/arduino-cli)
+- [PlatformIO IDE](https://platformio.org/)
 
 ### Configuration
 

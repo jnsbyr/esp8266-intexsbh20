@@ -28,6 +28,7 @@
 #define COMMON_H
 
 #include <climits>
+#include <c_types.h>
 #include <../d1_mini/pins_arduino.h>
 
 /*****************************************************************************
@@ -51,7 +52,7 @@
 
 namespace CONFIG
 {
-  const char WIFI_VERSION[] = "1.0.7.0"; // 11.08.2023
+  const char WIFI_VERSION[] = "1.0.7.1"; // 12.08.2023
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot

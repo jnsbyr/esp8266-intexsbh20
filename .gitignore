@@ -1,3 +1,7 @@
-private/
+.pio/
+include/
+lib/
 nbproject/
+private/
+test/
 *.bin
