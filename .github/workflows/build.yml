@@ -1,6 +1,12 @@
 name: Build Arduino Sketch [D1 mini, SBH-20 and SJB-HS]
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master, develop ]
+    paths: [ "src/**" ]
+  pull_request:
+    branches: [ develop ]
+    paths: [ "src/**" ]
 
 jobs:
   build:
@@ -11,7 +17,7 @@ jobs:
         include:
           - arduino-platform: "esp8266:esp8266@2.7.4"
             fqbn: "esp8266:esp8266:d1_mini:xtal=160,vt=iram,exception=enabled,ssl=basic,eesz=4M1M,ip=lm2f,dbg=Disabled,lvl=None____"
-            sketch: "esp8266-intexsbh20.ino"
+            sketch: "src/esp8266-intexsbh20/esp8266-intexsbh20.ino"
             install-options: "--additional-urls \"http://arduino.esp8266.com/stable/package_esp8266com_index.json\""
           - model: "SB-H20"
             compiler-options: "--warnings more --build-property compiler.cpp.extra_flags=\"-D MODEL_SB_H20\""
