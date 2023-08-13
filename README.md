@@ -246,18 +246,24 @@ sure to configure them in the Arduino IDE before building.
 Note that the firmware uses DHCP and the MQTT server is addressed by hostname.
 If you prefer static IPs you must modify the firmware appropriately.
 
-As an alternative to the Arduino IDE you can use Microsoft Visual Studio Code with one of the following extensions to build the firmware:
+As an alternative to the Arduino IDE you can use Microsoft Visual Studio Code
+with one of the following extensions to build the firmware:
 
-- [Visual Studio Code extension for Arduino](https://github.com/microsoft/vscode-arduino) and the
-  [Arduino CLI](https://github.com/arduino/arduino-cli)
+- [Visual Studio Code extension for Arduino](https://github.com/microsoft/vscode-arduino)
+  and the [Arduino CLI](https://github.com/arduino/arduino-cli)
 - [PlatformIO IDE](https://platformio.org/)
 
 ### Configuration
 
 Edit the example configuration file *config.json* in the subdirectory *data*.
+
 If you install the [Arduino ESP8266 LittleFS Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin)
-you can use the *Tools* menu of the Arduino IDE to upload the content of the *data*
-subdirectory to the MCU.
+you can use the Arduino IDE *Tools* menu to upload the content of the *data*
+subdirectory to the MCU. 
+
+With PlatformIO you should copy the *data* subdirectory from the *src* folder
+into the project root folder to be able to use the task "Upload
+Filesystem Image".
 
 Example:
 
