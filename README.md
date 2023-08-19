@@ -133,14 +133,17 @@ the timing right, but that is not all. Geoffroy documented in his code that the
 interrupt driven data receive is unreliable but he did not name a reason. The
 reason is that the ESP8266 WiFi processing has precedence over all other MCU
 tasks and will disrupt time critical processing including ISRs. This is acceptable
-for the data receive because the data repeats at a high frequency. Incomplete
+for the data receive because the data repeats at a high frequency: incomplete
 frames can be ignored and invalid frame data can be filtered out by using only
 repeated identical data. But during the button signalling a receive error causes
-side effects. A single button press might be ignored or may cause a double change.
-With multiple consecutive button presses the error probability increases
-significantly. To prevent this I decided to activate the ESP8266 WiFi modem sleep
-when changing the water temperature. This improves the reliability noticeably but
-the ESP8266 looses its connection to the AP and the MQTT server for a few seconds.
+side effects: a single button press might be ignored or may cause a double change,
+and with multiple consecutive button presses the error probability increases
+significantly. Activating the ESP8266 WiFi modem sleep while changing the water
+temperature improves the receive quality but then the ESP8266 looses its
+connection to the AP and the MQTT server for a few seconds with every change.
+That is why the latest firmware uses an iterative approach reading back the
+new effective setting after each button press and even changing the direction
+if an unintentional double change has resulted in overstepping the desired value.
 
 
 ## Building your own WiFi remote control
@@ -225,7 +228,7 @@ Select your Intex PureSpa model based on the table in the
 at the beginning of the file [common.h](src/esp8266-intexsbh20/common.h).
 
 If changing the water temperature does not work reliably for you, rebuild the
-firmware after commenting in *#define FORCE_WIFI_SLEEP* to use the "original"
+firmware after commenting in *#define FORCE_WIFI_SLEEP* to use an alternative
 method where the WiFi will be disabled while changing the temperature. Note that
 this will also interrupt the TCP/IP connection to the MQTT server.
 
@@ -234,10 +237,10 @@ The following **components** are required to build the firmware:
  Component    | Version | Notes
  ------------ |:------- |:-------------------------------------------------------------------------------------------------------
  Arduino IDE  | 1.8     | firmware does not build successfully with Arduino IDE 2.X, see [issue #30](../../issues/30)
- ESP8266 SDK  | 2.7.4   | install using the Arduino board manager,<br/>3.1.2 is also reported to work, see [issue #13](../../issues/13)
- ArduinoJSON  | 6.19.4  | install using the Arduino library manager
- PubSubClient | 2.8     | install using the Arduino library manager, compiler warnings can be ignored
- 
+ ESP8266 SDK  | 3.1.2   | install using the Arduino board manager
+ ArduinoJSON  | 6.21.3  | install using the Arduino library manager
+ PubSubClient | 2.8     | install using the Arduino library manager (ignore compiler warnings)
+
 Other versions may also work but are not tested.
 
 The required **board settings** are documented at the top of the INO file. Make
@@ -261,9 +264,8 @@ If you install the [Arduino ESP8266 LittleFS Filesystem Uploader](https://github
 you can use the Arduino IDE *Tools* menu to upload the content of the *data*
 subdirectory to the MCU. 
 
-With PlatformIO you should copy the *data* subdirectory from the *src* folder
-into the project root folder to be able to use the task "Upload
-Filesystem Image".
+When using PlatformIO you should copy the *data* subdirectory from the *src*
+folder into the project root folder to be able to use the task "Upload Filesystem Image".
 
 Example:
 

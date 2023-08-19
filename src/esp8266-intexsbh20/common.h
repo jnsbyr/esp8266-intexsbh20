@@ -52,7 +52,7 @@
 
 namespace CONFIG
 {
-  const char WIFI_VERSION[] = "1.0.7.2"; // 12.08.2023
+  const char WIFI_VERSION[] = "1.0.8.0"; // 19.08.2023
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot

@@ -29,12 +29,12 @@
 /**
  * BUILD ENVIRONMENT:
  *
- * IDE: Arduino 1.8.13
+ * IDE: Arduino 1.8.19
  *
  * Libraries:
  *
- * - Arduino Core for ESP8266 2.7.4
- * - ArduinoJson 6.19.4
+ * - Arduino Core for ESP8266 3.1.2
+ * - ArduinoJson 6.21.3
  * - PubSubClient (MQTT) 2.8
  *
  * Board: Wemos D1 mini (ESP8266)
