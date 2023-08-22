@@ -70,7 +70,7 @@ bool ConfigurationFile::load(const char* fileName)
       configFile.close();
       Serial.printf_P(PSTR("config file loaded successfully (has %d entries)\n"), configDoc.size());
     }
-    catch (std::runtime_error re)
+    catch (const std::runtime_error& re)
     {
       Serial.println(re.what());
       success = false;

@@ -134,7 +134,7 @@ void MQTTPublisher::loop()
         publishIfDefined(MQTT_TOPIC::JET, pureSpaIO.isJetOn(), PureSpaIO::UNDEF::BOOL);
       }
 
-      bool b = pureSpaIO.isHeaterOn();
+      uint8 b = pureSpaIO.isHeaterOn();
       if (b != PureSpaIO::UNDEF::BOOL)
       {
         mqttClient.publish(MQTT_TOPIC::HEATER, b? (pureSpaIO.isHeaterStandby()? "standby" : "on") : "off", retainAll);
