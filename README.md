@@ -105,15 +105,15 @@ facts:
 As Geoffroy did not document any details regarding the button signalling from
 the control panel to the mainboard, I assumed from the fact that Geoffroy used
 external hardware in addition to the ESP8266 that the SSP and SJB models
-require very special handling. As it later turned out the button signalling
-is also identical.
+require very special handling. As it later turned out, that was not the case,
+the button signalling is identical to the SBH model.
 
-Getting all the details right for this last aspect took a while. With the SB-H20
-data clock of 100 kHz it was like searching for a needle in a haystack. To get
-20 data points per clock cycle you need to run the logic analyser with 2 MS/s
-and this results in 4 million data points for the 2 seconds it takes to press
-and release a button on the control panel. Programming an ESP8266 MCU to provide
-a hardware trigger for the logic analyser was the key to narrow down where
+Getting all the details of the button signalling right took a while. With the
+SB-H20 data clock of 100 kHz it was like searching for a needle in a haystack.
+To get 20 data points per clock cycle you need to run the logic analyser with
+2 MS/s and this results in 4 million data points for the 2 seconds it takes to
+press and release a button on the control panel. Programming an ESP8266 MCU to
+provide a hardware trigger for the logic analyser was the key to narrow down where
 the action takes place: the control panel pulls the data line low for about 2 µs
 after a specific button scan data word was received from the mainboard and this
 signalling must be repeated until the mainboard confirms the button action by
@@ -121,14 +121,13 @@ enabling the display beeper.
 
 ![Button Signalling](assets/Button-Signalling.png "SB-H20 button signalling: data is pulled low while enable is high")
 
-Because of this difference between the Intex models it is not possible to use
-Geoffroy's schematics and code for the SB-H20. After testing several variants
+After testing several variants
 the required behaviour could be achieved with a much simpler circuit, that mostly
 consists of an ESP8266 and a TTL level shifter for the 3 signals.
 
 ![Schematic](assets/Schematic.png "schematic of WiFi remote control for Intex SB-H20")
 
-For the button signalling to work the ESP8266 must be running at 160 MHz to get
+For the button signalling to work, the ESP8266 must be running at 160 MHz to get
 the timing right, but that is not all. Geoffroy documented in his code that the
 interrupt driven data receive is unreliable but he did not name a reason. The
 reason is that the ESP8266 WiFi processing has precedence over all other MCU
