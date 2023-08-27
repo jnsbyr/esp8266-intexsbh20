@@ -13,10 +13,10 @@ jobs:
   build:
     strategy:
       matrix:
-        arduino-platform: [ "esp8266:esp8266@2.7.4" ]
+        arduino-platform: [ "esp8266:esp8266@3.1.2" ]
         model: [ "SB-H20", "SJB-HS" ]
         include:
-          - arduino-platform: "esp8266:esp8266@2.7.4"
+          - arduino-platform: "esp8266:esp8266@3.1.2"
             fqbn: "esp8266:esp8266:d1_mini:xtal=160,vt=iram,exception=enabled,ssl=basic,eesz=4M1M,ip=lm2f,dbg=Disabled,lvl=None____"
             sketch: "src/esp8266-intexsbh20/esp8266-intexsbh20.ino"
             install-options: "--additional-urls \"http://arduino.esp8266.com/stable/package_esp8266com_index.json\""
@@ -37,7 +37,7 @@ jobs:
         run: |
           arduino-cli core update-index ${{ matrix.install-options }}
           arduino-cli core install ${{ matrix.arduino-platform }} ${{ matrix.install-options }}
-          arduino-cli lib install ArduinoJson@6.19.4
+          arduino-cli lib install ArduinoJson@6.21.3
           arduino-cli lib install PubSubClient@2.8
       - name: Compile Sketch
         run: arduino-cli compile --fqbn ${{ matrix.fqbn }} ./${{ matrix.sketch }} ${{ matrix.compiler-options }}
