@@ -7,5 +7,6 @@
  "mqttPassword":   "leave blank if you don't have authentication",
  "mqttRetain":     "no",
  "firmwareURL":    "http://192.168.0.1/firmware/esp8266-intexsbh20.bin",
- "errorLanguage":  "EN"
+ "errorLanguage":  "EN",
+ "mode":           "SETUP"
 }
