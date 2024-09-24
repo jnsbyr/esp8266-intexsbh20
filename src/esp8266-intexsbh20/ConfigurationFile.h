@@ -34,8 +34,11 @@ class ConfigurationFile
 {
 public:
   bool load(const char* fileName);
+  bool save(const char* fileName);
   bool exists(const char* tag) const;
   const char* get(const char* tag);
+  bool set(const char* tag, const char* value);
+
 
 private:
   static const unsigned int CONFIG_BUFFER_SIZE     = 512; // [bytes]

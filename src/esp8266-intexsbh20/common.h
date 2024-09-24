@@ -53,6 +53,7 @@
 
 //#define SERIAL_DEBUG
 
+//#define WIFI_MANAGER
 /*****************************************************************************/
 
 namespace CONFIG
@@ -83,6 +84,8 @@ namespace CONFIG_TAG
   const char MQTT_PASSWORD[]   = "mqttPassword";
   const char MQTT_RETAIN[]     = "mqttRetain";
   const char MQTT_ERROR_LANG[] = "errorLanguage";
+
+  const char WIFI_MODE[]       = "mode";
 };
 
 // MQTT topics
@@ -134,8 +137,10 @@ namespace PIN
 // serial debugging
 #ifdef SERIAL_DEBUG
 #define DEBUG_MSG(...) Serial.printf( __VA_ARGS__ )
+#define DEBUG_MSGNOLN(str, ...) {  Serial.printf(str, ##__VA_ARGS__);  }
 #else
 #define DEBUG_MSG(...)
+#define DEBUG_MSGNOLN(str, ...)
 #endif
 
 // time delta with overflow support

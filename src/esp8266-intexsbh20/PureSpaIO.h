@@ -175,6 +175,9 @@ public:
   uint8 isHeaterStandby() const;
   uint8 isJetOn() const;
   uint8 isPowerOn() const;
+#ifdef WIFI_MANAGER
+  bool isSetupModeTriggered() const;
+#endif
 
   void setDesiredWaterTempCelsius(int temp);
   void setDisinfectionTime(int hours);
@@ -213,6 +216,10 @@ private:
   public  :
     static const unsigned int BITS = 16; // bits per frame
     static const unsigned int FREQUENCY = CYCLE::TOTAL_FRAMES/CYCLE::PERIOD; // frames/ms
+  #ifdef WIFI_MANAGER
+    static const unsigned int UNITCHANGE_COUNTER_MAX = 6000;
+    static const unsigned int UNITCHANGE_MIN         = 5;
+  #endif
   };
 
   class BLINK
@@ -256,6 +263,10 @@ private:
     unsigned int lastErrorChangeFrameCounter = 0;
     unsigned int frameCounter = 0;
     unsigned int frameDropped = 0;
+  #ifdef WIFI_MANAGER
+    unsigned int counterTempUnitChanged = 0;
+    unsigned int lastTempUnitChangeFrameCounter = 0;
+  #endif
   };
 
   struct IsrState
@@ -264,6 +275,9 @@ private:
     uint32 latestBlinkingTemp     = UNDEF::UINT;
     uint32 latestDisinfectionTime = UNDEF::UINT;
     uint16 latestLedStatus = UNDEF::USHORT;
+#ifdef WIFI_MANAGER
+    uint8 latestTempUnit          = 0;
+#endif
 
     uint16 frameValue = 0;
     uint16 receivedBits = 0;
@@ -334,9 +348,9 @@ private:
 #endif
 
 private:
-  LANG language;
+  LANG language = LANG::CODE;
   unsigned long lastStateUpdateTime = 0;
-  char errorBuffer[4];
+  char errorBuffer[4] = {0,};
 };
 
 #endif /* PURE_SPA_IO_H */

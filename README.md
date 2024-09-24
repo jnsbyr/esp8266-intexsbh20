@@ -256,6 +256,11 @@ with one of the following extensions to build the firmware:
 
 ### Configuration
 
+To configure the system, you may either provide the whole configation in a JSON
+file or rely on a Wifi Manager to fill up configuration file.
+Wifi Manager is to be enabled though the *WIFI_MANAGER* feature flag.
+
+#### Manual configuration
 Edit the example configuration file *config.json* in the subdirectory *data*.
 
 If you install the [Arduino ESP8266 LittleFS Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin)
@@ -277,7 +282,8 @@ Example:
  "mqttPassword":   "password",
  "mqttRetain":     "no",
  "firmwareURL":    "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
- "errorLanguage":  "EN"
+ "errorLanguage":  "EN",
+ "mode":           "RUNNING"
 }
 ```
 
@@ -297,6 +303,53 @@ omitted, the control panel error code will be used.
 All other config values are mandatory. If you get a parsing error in the serial
 monitor when starting the MCU look closely into your config file. Maybe you
 missed a quote or a comma somewhere.
+
+#### Using Wifi Manager
+
+In order to use this feature, the software has to be built with the
+#define WIFI_MANAGER feature flag at the beginning of the file [common.h](src/esp8266-intexsbh20/common.h).
+
+As a [manual setting](#manual-configuration), a bare config.json has to be present within LittleFS:
+```json
+{
+ "wifiSSID":       "WiFi-SSID",
+ "wifiPassphrase": "WiFi-secret",
+ "mqttServer":     "mqtt.at.home",
+ "mqttPort":       "1883",
+ "mqttUser":       "userName",
+ "mqttPassword":   "password",
+ "mqttRetain":     "no",
+ "firmwareURL":    "http://webserver.at.home/firmware/SB-H20-WiFiController.bin",
+ "errorLanguage":  "EN",
+ "mode":           "SETUP"
+}
+```
+
+It is important to set mode=SETUP. Others can be left unchanged or partially
+filled.
+
+When powering up for the first time, controller will be in Access Point Mode (AP).
+LED flashs rapidely to indicate AP Mode. Using you mobile or computer, seek for
+Wifi Network **"ESP8266_Setup"** and a configuration screen will pop up,
+enabling to set your home Wifi information, MQTT server and so on. After a
+checking of your settings, the controller reboots and start to operate !
+
+When powering up for the first time, the controller will be in Access Point Mode
+(AP). The LED flashes rapidly to indicate AP Mode.
+Using your mobile or computer, seek the WiFi network **"ESP8266_Setup"** and a
+configuration screen will pop up, enabling you to set your home WiFi information,
+MQTT server, and so on.
+![Wifi Manager](assets/Wifi-Manager.jpg "Wifi Manager screen")
+
+After checking your settings, the controller reboots and starts to operate
+
+All configurations are stored within LittleFS, and the mode is set to **"mode=RUNNING"**.
+The LED flashes slowly to indicate running mode.
+
+To re-enter setup mode, when your spa is powered on, press the temperature units
+change button (C/F) 6 times quickly, then switch off the spa (not electrically
+but on the control panel).
+The controller reboots and enters setup mode.
 
 ### MQTT
 

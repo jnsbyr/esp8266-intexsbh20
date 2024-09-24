@@ -86,6 +86,55 @@ bool ConfigurationFile::load(const char* fileName)
 }
 
 /**
+ * Save JSON config file into LittleFS
+ *
+ * @param fileName name of file
+ * @return true on success
+ */
+bool ConfigurationFile::save(const char* fileName)
+{
+  bool success = true;
+
+  if (LittleFS.begin())
+  {
+    try
+    {
+      // open wifiConfig file
+      File configFile = LittleFS.open(fileName, "w");
+      if (!configFile)
+      {
+        snprintf_P(exceptionMessage, EXCEPTION_MESSAGE_SIZE, PSTR("config file '%s' failed to open for writing"), fileName);
+        throw std::runtime_error(exceptionMessage);
+      }
+
+      // parse buffer as JSON object
+      size_t nb_written = serializeJsonPretty(configDoc, configFile);
+      if (!nb_written)
+      {
+        snprintf_P(exceptionMessage, EXCEPTION_MESSAGE_SIZE, PSTR("Can't write JSON"));
+        throw std::runtime_error(exceptionMessage);
+      }
+
+      // close config file
+      configFile.close();
+      Serial.printf_P(PSTR("config file written successfully\n"));
+    }
+    catch (const std::runtime_error& re)
+    {
+      Serial.println(re.what());
+      success = false;
+    }
+  }
+  else
+  {
+    Serial.printf_P(PSTR("error mounting file system, unable to open config file\n"));
+    success = false;
+  }
+
+  return success;
+}
+
+/**
  * try if config tag exists
  * @param tag
  * @return true if config tag exists
@@ -115,4 +164,29 @@ const char* ConfigurationFile::get(const char* tag)
     throw std::runtime_error(exceptionMessage);
     return NULL;
   }
+}
+
+/**
+ * try to find config tag and set its value
+ *
+ * @param tag config tag
+ * @param value to set
+ * @return True if done
+ *
+ * @throws std::runtime_error if config tag is unknown
+ */
+bool ConfigurationFile::set(const char* tag, const char* value)
+{
+    try {
+      /* Warning, StaticJsonDocument stores only pointers: there is no copy.
+      This is up to apllication to keep track values integreity. Otherwise values
+      won't be kept and leads to memory corruption.*/
+      configDoc[tag] = value;
+    }
+    catch (const std::runtime_error& re)
+    {
+      Serial.println(re.what());
+    }
+
+  return true;
 }

@@ -51,7 +51,7 @@ private:
   float adcScale             = 320.0f/100.0f/1024; // [V/digit] ESP8266 10-bit ADC, Wemos D1 mini voltage divider 220 kOhm - 100 kOhm
 
 private:
-  float history[HISTORY_DEPTH];
+  float history[HISTORY_DEPTH] = {0.};
   unsigned int historyDepth = 0;
   unsigned int historyHead = 0;
 };
