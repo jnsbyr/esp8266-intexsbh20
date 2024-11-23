@@ -38,8 +38,8 @@ this project, open an issue to request permission.
   created by others, you have full legal responsibility to a) check the license
   compatibility with this project, b) make changes to the contribution to
   resolve existing licensing conflicts and c) provide the required contribution
-  information, e.g. for the [Licenses and Credits]
-  (https://github.com/jnsbyr/esp8266-intexsbh20?tab=readme-ov-file#licenses-and-credits)
+  information, e.g. for the
+  [Licenses and Credits](https://github.com/jnsbyr/esp8266-intexsbh20?tab=readme-ov-file#licenses-and-credits)
   part of the README.
   
 ---
