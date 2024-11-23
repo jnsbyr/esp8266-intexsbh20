@@ -28,9 +28,20 @@ this project, open an issue to request permission.
   immediately it might become necessary to repeat this process if other
   updates have been added to the project in the meantime.
 
-- In case of a feature request consider adding to the documentation in
+- In case of a new feature consider adding to the documentation in
   the [README](README.md).
 
+- If the code or resources you plan to contribute are you own, you agree that
+  they will be made available under the license of this project.
+  
+- If the code or resources you plan to contribute have been in part or whole
+  created by others, you have full legal responsibility to a) check the license
+  compatibility with this project, b) make changes to the contribution to
+  resolve existing licensing conflicts and c) provide the required contribution
+  information, e.g. for the [Licenses and Credits]
+  (https://github.com/jnsbyr/esp8266-intexsbh20?tab=readme-ov-file#licenses-and-credits)
+  part of the README.
+  
 ---
 
 *This project is a volunteer effort. Your support is welcome!*
