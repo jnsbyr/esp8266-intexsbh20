@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<!-- (c) Geoffroy HUBERT - yorffoeg@gmail.com - https://github.com/yorffoeg/diyscip -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ESP8266 IntexSPA - Wifi/Server settings</title>
+    <style>
+      body {
+        max-width: 600px;
+        margin: auto;
+        padding: 10px;
+        line-height: 1.43;
+        letter-spacing: 0.01071em;
+        background-color: #FFF;
+      }
+
+      label {
+        position: absolute;
+        width: 100%;
+        transform: translateY(-1.75em);
+        transform-origin: 0 0;
+        top: 0;
+        left: 0;
+        height: 100%;
+        font-size: 0.8em;
+        color: rgba(0, 0, 0, 0.42);
+      }
+
+      input:not([type='checkbox']) {
+        font-size: 1em;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+        border-radius: 0;
+        outline: 0;
+        height: 2em;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -webkit-box-sizing: content-box;
+        box-sizing: content-box;
+        text-align: left;
+      }
+
+      input:focus {
+        border-bottom: 2px solid rgba(0, 0, 255, 0.42);
+      }
+
+      input:focus + label {
+        color: rgba(0, 0, 255, 1);
+      }
+
+      .select {
+        position: relative;
+      }
+
+      .select:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        margin-top: -3px;
+        right: 4em;
+        display: block;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-top-color: #444;
+        border-width: 6px;
+        border-style: solid;
+        pointer-events: none;
+      }
+
+      select {
+        font-size: 1em;
+        width: 100%;
+        height: 2em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+        background-color: #FFF;
+        outline: 0;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        height: auto;
+        border: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      div.pending:not(.passed):not(.failed),
+      select:disabled {
+        animation: blink-animation 1s steps(5, start) infinite;
+        -webkit-animation: blink-animation 1s steps(5, start) infinite;
+      }
+
+      @keyframes blink-animation {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @-webkit-keyframes blink-animation {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .input-field {
+        position: relative;
+        margin-top: 2.5em;
+      }
+
+      .input-field button {
+        padding: 12px;
+        margin: 0;
+        border: 0;
+        outline: 0;
+        color: rgba(0, 0, 0, 0.54);
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        right: 6px;
+        width: 30px;
+        height: 30px;
+        background-color: #FFF;
+      }
+
+      .input-field button.show {
+        background-image: url("data:image/svg+xml;utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'></path></svg>");
+      }
+
+      .input-field button.hide {
+        background-image: url("data:image/svg+xml;utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z'></path></svg>");
+      }
+
+      .input-field button svg {
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+        font-size: 1.5rem;
+      }
+
+      #force {
+        position: absolute;
+        right: 0;
+        top: -0.5em;
+      }
+
+      .signal {
+      	border:2px solid transparent;
+      	border-radius:100%;
+        border-top-color:#FFF;
+        margin:4px auto;
+      }
+
+      .max {
+      	width:40px;
+      	height:30px;
+      }
+
+      .medium {
+      	width:30px;
+      	height:20px;
+      }
+
+      .low {
+      	width:20px;
+      	height:10px;
+      }
+
+      .none {
+      	width:2px;
+      	height:2px;
+      }
+
+      #force.level100,
+      #force.level100 .medium,
+      #force.level100 .low,
+      #force.level100 .none {
+        border-top-color:#A1A1A1;
+      }
+
+
+      #force.level75 .medium,
+      #force.level75 .low,
+      #force.level75 .none {
+        border-top-color:#A1A1A1;
+      }
+
+      #force.level50 .low,
+      #force.level50 .none {
+        border-top-color:#A1A1A1;
+      }
+
+      #force.level25 .none {
+        border-top-color:#A1A1A1;
+      }
+
+      div.check {
+        font-size: 1.2em;
+        line-height: 2em;
+        opacity: 0.3;
+      }
+
+      div.check>div {
+        display: inline-block;
+        vertical-align: sub;
+        margin-right: 10px;
+        width: 30px;
+        height: 30px;
+      }
+
+      div.failed {
+        opacity: 1;
+        color: red;
+        text-decoration: line-through;
+      }
+
+      div.passed {
+        opacity: 1;
+      }
+      div.passed>div {
+        background-image: url("data:image/svg+xml;utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' stroke='green'></path></svg>");
+      }
+
+      #check,
+      #save {
+        width: 100%;
+        margin-top: 35px;
+        color: #fff;
+        background-color: #1976d2;
+        box-shadow: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12);
+        color: #FFF;
+        padding: 6px 16px;
+        font-size: 1.3rem;
+        border: 0;
+        cursor: pointer;
+        outline: 0;
+        border-radius: 4px;
+        letter-spacing: 0.02857em;
+      }
+
+      #save:disabled {
+        background-color: #CCC;
+        font-size: 0.8rem;
+      }
+
+      #save.fix {
+        background-color: transparent;
+        color: black;
+        box-shadow: 0;
+        border: 1px solid black;
+      }
+
+      #explerr {
+        color: red;
+        padding-left: 40px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #modal {
+        display: none;
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+
+      #modal>div {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+      }
+
+      #closemodal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      #closemodal:hover,
+      #closemodal:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      pre {
+        white-space: normal;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="settings">
+      <h2>Language</h2>
+      <div class="input-field select">
+        <select id="lang">
+          <option value="CODE">Code Only</option>
+          <option value="EN">English</option>
+          <option value="FR">Francais</option>
+          <option value="EN">Deutch</option>
+        </select>
+        <label for="lang">Select your language</label>
+      </div>
+      <h2>OTA Settings</h2>
+      <div class="input-field">
+        <input id="otafw" type="text" value="http://192.168.0.1/firmware/esp8266-intexsbh20.bin" />
+        <label for="otafw">Firmware URL for OTA</label>
+      </div>
+
+      <h2>WiFi Settings</h2>
+      <div class="input-field select">
+        <select id="ssid" disabled>
+          <option disabled selected value="">searching available wifi networks</option>
+        </select>
+        <label for="ssid">WiFi network</label>
+        <div id="force" class="signal max">
+            <div class="signal medium">
+                <div class="signal low">
+                    <div class="signal none">
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="input-field">
+        <input id="wifipwd" type="password" />
+        <label for="wifipwd">WiFi password *</label>
+        <button class="hide"></button>
+      </div>
+      <h2>MQTT Server</h2>
+      <div class="input-field">
+        <input id="host" type="text" />
+        <label for="host">Hostname or IP Address *</label>
+      </div>
+      <div class="input-field">
+        <input id="port" type="number" />
+        <label for="port">TCP Port *</label>
+      </div>
+      <div class="input-field">
+        <input id="user" type="text" />
+        <label for="user">Username</label>
+      </div>
+      <div class="input-field">
+        <input id="pwd" type="password" />
+        <label for="pwd">Password</label>
+        <button class="hide"></button>
+      </div>
+      <div class="input-field">
+        <input id="mqttretain" type="checkbox" />
+        <label for="mqttretain">MQTT Retain Flag</label>
+      </div>
+      <button id="check">APPLY SETTINGS</button>
+    </div>
+    <div id="checking" class="hidden">
+      <h2>Checking settings</h2>
+      <div class="check"><div></div>WiFi network/password</div>
+      <div class="check"><div></div>Server MQTT hostname resolution</div>
+      <div class="check"><div></div>Server MQTT TCP connection</div>
+      <div class="check"><div></div>Server MQTT protocol connection</div>
+      <div id="explerr"></div>
+      <button id="save" disabled>please wait for the checks to finish</button>
+    </div>
+
+    <div id="modal">
+      <div>
+        <span id="closemodal">&times;</span>
+        <pre id="modalmsg"></pre>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        let settings   = document.getElementById('settings'),
+            checking   = document.getElementById('checking'),
+            pwdButtons = document.querySelectorAll('.input-field button'),
+            checkBtn   = document.getElementById('check'),
+            saveBtn    = document.getElementById('save'),
+            ssid       = document.getElementById('ssid'),
+            force      = document.getElementById('force'),
+            wifipwd    = document.getElementById('wifipwd'),
+            host       = document.getElementById('host'),
+            port       = document.getElementById('port'),
+            user       = document.getElementById('user'),
+            pwd        = document.getElementById('pwd'),
+            otafw      = document.getElementById('otafw'),
+            mqttretain = document.getElementById('mqttretain'),
+            lang       = document.getElementById('lang'),
+            checks     = document.querySelectorAll('.check'),
+            explerr    = document.getElementById('explerr');
+
+        pwdButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            let button = e.currentTarget, input = button.previousSibling;
+
+            while (input.nodeName !== 'INPUT') {
+              input = input.previousSibling;
+            }
+
+            if (button.classList.contains('show')) {
+              input.type = 'password';
+              button.classList.remove('show');
+              button.classList.add('hide');
+            } else {
+              input.type = 'hide';
+              button.classList.remove('hide');
+              button.classList.add('show');
+            }
+          })
+        });
+
+        ssid.addEventListener('change', e => {
+            let option = ssid.options[ssid.selectedIndex],
+                rssi   = option.getAttribute('data-rssi');
+
+            force.classList.remove('level100','level75','level50','level25');
+            if (rssi > -50) {
+              force.classList.add('level100');
+            } else if (rssi > -70) {
+              force.classList.add('level75');
+            } else if (rssi > -80) {
+              force.classList.add('level50');
+            } else {
+              force.classList.add('level25');
+            }
+        });
+
+        checkBtn.addEventListener('click', () => {
+
+          if (ssid.value == "") {
+            ssid.focus();
+            return ;
+          }
+          if (wifipwd.value == "") {
+            wifipwd.focus();
+            return ;
+          }
+          if (host.value == "") {
+            host.focus();
+            return;
+          }
+          if (!port.value) {
+            port.focus();
+            return;
+          }
+
+          let datas, xhr = new XMLHttpRequest();
+
+          datas = ssid.value      + '\n';
+          datas += wifipwd.value  + '\n';
+          datas += otafw.value    + '\n';
+          datas += host.value     + '\n';
+          datas += port.value     + '\n';
+          datas += user.value     + '\n';
+          datas += pwd.value      + '\n';
+          datas += (mqttretain.checked ? 'yes' : 'no') + '\n';
+          datas += lang.value    + '\n';
+          datas += 'EOD';
+
+          xhr.onload = () => {
+            try {
+              let data = JSON.parse(xhr.responseText);
+
+              if (!data.hasOwnProperty('error')) {
+                checkSettings();
+              } else {
+                showModal(data.error);
+              }
+
+            } catch(e) {
+              showModal('json error\n' + xhr.responseText);
+            }
+
+          }
+          xhr.onerror = () => {
+            showModal(xhr.responseText || 'Network request failed');
+          }
+
+          xhr.open('POST', '/settings', true);
+          xhr.setRequestHeader('Content-type', 'text/plain');
+          xhr.send(datas);
+        });
+
+        function checkSettings() {
+          let data, xhr = new XMLHttpRequest();
+
+          settings.classList.add('hidden');
+          checking.classList.remove('hidden');
+
+          xhr.onload = () => {
+            try {
+              let data = JSON.parse(xhr.responseText);
+
+              if (data.hasOwnProperty('error')) {
+                showModal(data.error);
+                return;
+              }
+
+              if (data.checks == 0) {
+                fixSettings();
+                return;
+              }
+
+              if (data.checks & 0x0800) {
+                checks[0].classList.add('passed');
+                checks[1].classList.add('passed');
+                checks[2].classList.add('passed');
+
+                if (data.checks & 0x4000) {
+                  checks[3].classList.add('pending');
+                } else if (data.checks & 0x8000) {
+                  switch (data.checks & 0x00FF) {
+                    case 1:
+                      explerr.innerHTML = "Server does not support MQTT 3.1.1";
+                      break;
+                    case 2:
+                      explerr.innerHTML = "Server has rejected the Device ID";
+                      break;
+                    case 3:
+                      explerr.innerHTML = "Service is currently unavailable";
+                      break;
+                    case 4:
+                      explerr.innerHTML = "Bad user name or password";
+                      break;
+                    case 5:
+                      explerr.innerHTML = "Not authorized to connect"
+                      break;
+                  }
+                  checks[3].classList.add('failed');
+                }
+              } else if (data.checks & 0x0400) {
+                checks[0].classList.add('passed');
+                checks[1].classList.add('passed');
+
+                if (data.checks & 0x4000) {
+                  checks[2].classList.add('pending');
+                } else if (data.checks & 0x8000) {
+                  checks[2].classList.add('failed');
+                }
+              } else if (data.checks & 0x0200) {
+                checks[0].classList.add('passed');
+
+                if (data.checks & 0x4000) {
+                  checks[1].classList.add('pending');
+                } else if (data.checks & 0x8000) {
+                  checks[1].classList.add('failed');
+                }
+              } else if (data.checks & 0x0100) {
+                if (data.checks & 0x4000) {
+                  checks[0].classList.add('pending');
+                } else if (data.checks & 0x8000) {
+                  checks[0].classList.add('failed');
+                }
+              }
+
+              if (data.checks & 0x4000) { // pending
+                setTimeout(() => {
+                  xhr.open('get', 'checks', true);
+                  xhr.send();
+                }, 1000);
+              } else {
+                if (data.checks & 0x8000) { // error
+                  saveBtn.innerHTML = 'PLEASE FIX SETTINGS';
+                  saveBtn.classList.add('fix');
+
+                } else { // success
+                  checks[3].classList.add('passed');
+
+                  saveBtn.innerHTML = 'SAVE SETTINGS AND RESTART';
+                }
+
+                saveBtn.removeAttribute('disabled');
+              }
+
+            } catch(e) {
+              showModal('json error\n' + xhr.responseText);
+            }
+          };
+
+          xhr.onerror = () => {
+            showModal(xhr.responseText || 'Network request failed');
+          }
+
+          xhr.open('get', 'checks', true);
+          xhr.send();
+        }
+
+        saveBtn.addEventListener('click', () => {
+          if (saveBtn.classList.contains("fix")) {
+
+            fixSettings();
+
+          } else {
+            let xhr = new XMLHttpRequest();
+
+            xhr.onload = () => {
+              try {
+                let data = JSON.parse(xhr.responseText);
+
+                if (data.hasOwnProperty('error')) {
+                  showModal(data.error);
+                  return;
+                }
+                window.close();
+
+              } catch (e) {
+                showModal('json error\n' + xhr.responseText);
+              }
+            };
+
+            xhr.onerror = () => {
+              showModal(xhr.responseText || 'Network request failed');
+            }
+
+            xhr.open('POST', '/save');
+            xhr.send();
+          }
+        });
+
+        function fixSettings() {
+          checking.classList.add('hidden');
+          settings.classList.remove('hidden');
+
+          saveBtn.innerHTML = "please wait for the checks to finish";
+          saveBtn.classList.remove("fix");
+          saveBtn.setAttribute("disabled", "disabled");
+
+          explerr.innerHTML = "";
+
+          for (let i=0; i<4; i++) {
+            checks[i].classList.remove('failed');
+            checks[i].classList.remove('pending');
+            checks[i].classList.remove('passed');
+          }
+        }
+
+        function showModal(msg) {
+          let modal     = document.getElementById('modal'),
+              modalmsg  = document.getElementById('modalmsg'),
+              closeBtn  = document.getElementById('closemodal');
+
+          function closeModal(e) {
+
+            if ((e.currentTarget !== window) || (e.target === modal)) {
+              modal.style.display = "none";
+
+              closeBtn.removeEventListener('click', closeModal);
+              window.removeEventListener('click', closeModal);
+            }
+          }
+
+          closeBtn.addEventListener('click', closeModal);
+          window.addEventListener('click', closeModal);
+          modalmsg.innerHTML = msg;
+
+          modal.style.display = "block";
+        }
+
+        (function () {
+          let xhr = new XMLHttpRequest();
+
+          xhr.onload = () => {
+            try {
+              let datas = JSON.parse(xhr.responseText);
+
+              if (datas.hasOwnProperty('error')) {
+                showModal(datas.error);
+                return;
+              }
+
+              if (datas.wifis.length > 0) {
+
+                datas.wifis.forEach(wifi => {
+                  let option = document.createElement('option');
+
+                  option.value  = wifi.ssid;
+                  option.text   = wifi.ssid;
+                  option.setAttribute('data-rssi',    wifi.rssi);
+                  option.setAttribute('data-secure',  wifi.secure);
+
+                  ssid.appendChild(option);
+                  ssid.options[0].text = "choose a network";
+                  ssid.disabled = false;
+                });
+
+              } else {
+
+                ssid.options[0].text = "no wifi networks found";
+                ssid.disabled = false;
+              }
+
+              ssid.value    = datas.ssid;
+              wifipwd.value = datas.wifipwd;
+              host.value    = datas.host;
+              port.value    = (datas.port > 0) ? datas.port : '';
+              user.value    = datas.user;
+              pwd.value     = datas.pwd;
+              otafw.value   = datas.otafw;
+              mqttretain.checked  = datas.mqttretain !== 'no';
+              lang.value    = datas.lang;
+
+              if (ssid.selectedIndex < 0) {
+                ssid.selectedIndex = 0;
+              } else {
+                ssid.dispatchEvent(new Event('change'));
+              }
+
+              if (datas.check & 0x4000) {
+                checkSettings();
+              }
+
+            } catch(e) {
+              showModal('json error\n' + xhr.responseText);
+            }
+          };
+
+          xhr.onerror = (e) => {
+            showModal(xhr.responseText || 'Network request failed');
+          }
+
+          xhr.open('get', 'settings', true);
+          xhr.send();
+        })();
+
+      })();
+    </script>
+
+  </body>
+</html>

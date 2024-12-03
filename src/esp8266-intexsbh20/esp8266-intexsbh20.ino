@@ -55,6 +55,10 @@
 #include "NTCThermometer.h"
 #include "OTAUpdate.h"
 #include "PureSpaIO.h"
+#ifdef WIFI_MANAGER
+#include "WIFIManager.h"
+#include "LEDManager.h"
+#endif
 
 #include <stdexcept>
 
@@ -62,6 +66,10 @@ ConfigurationFile config;
 NTCThermometer thermometer;
 OTAUpdate otaUpdate;
 PureSpaIO pureSpaIO;
+#ifdef WIFI_MANAGER
+LEDManager ledBuiltin(LED_BUILTIN);
+WIFIManager wifiManager(ledBuiltin);
+#endif
 
 MQTTClient mqttClient;
 MQTTPublisher mqttPublisher(mqttClient, pureSpaIO, thermometer);
@@ -90,71 +98,84 @@ void setup()
   bool ready = false;
   if (config.load(CONFIG_TAG::FILENAME))
   {
-    try
-    {
-      // init WiFi (station mode, DHCP, auto modem sleep after 10 s idle, auto wakeup every 100 ms * AP DTIM interval)
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(config.get(CONFIG_TAG::WIFI_SSID), config.get(CONFIG_TAG::WIFI_PASSPHRASE));
-
-      // init MQTT
-      bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN)? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
-      mqttPublisher.setRetainAll(retainAll);
-
-      mqttClient.addMetadata(MQTT_TOPIC::MODEL, pureSpaIO.getModelName());
-      mqttClient.addMetadata(MQTT_TOPIC::VERSION, CONFIG::WIFI_VERSION);
-
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void { pureSpaIO.setBubbleOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void { pureSpaIO.setFilterOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void { pureSpaIO.setHeaterOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER,  [](bool b) -> void { pureSpaIO.setPowerOn(b); });
-      mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { pureSpaIO.setDesiredWaterTempCelsius(i); });
-      if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
+#ifdef WIFI_MANAGER
+    wifiManager.setup(config, pureSpaIO.getModelName());
+    if (wifiManager.isSTA())
+      ledBuiltin.setMode(BLINK_STA);
+    else
+      ledBuiltin.setMode(BLINK_AP);
+#endif
+    if ( strcmp(config.get(CONFIG_TAG::WIFI_MODE), "RUNNING") == 0 ) {
+      try
       {
-        mqttClient.addSubscriber(MQTT_TOPIC::CMD_DISINFECTION, [](int i) -> void { pureSpaIO.setDisinfectionTime(i); });
-        mqttClient.addSubscriber(MQTT_TOPIC::CMD_JET,          [](bool b) -> void { pureSpaIO.setJetOn(b); });
-      }
+#ifndef WIFI_MANAGER
+        // init WiFi (station mode, DHCP, auto modem sleep after 10 s idle, auto wakeup every 100 ms * AP DTIM interval)
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(config.get(CONFIG_TAG::WIFI_SSID), config.get(CONFIG_TAG::WIFI_PASSPHRASE));
+#endif
+        // init MQTT
+        bool retainAll = config.exists(CONFIG_TAG::MQTT_RETAIN)? strcmp(config.get(CONFIG_TAG::MQTT_RETAIN), "no") != 0 : false;
+        mqttPublisher.setRetainAll(retainAll);
 
-      // enable OTA update if URL is defined in config
-      if (config.exists(CONFIG_TAG::WIFI_OTA_URL))
+        mqttClient.addMetadata(MQTT_TOPIC::MODEL, pureSpaIO.getModelName());
+        mqttClient.addMetadata(MQTT_TOPIC::VERSION, CONFIG::WIFI_VERSION);
+
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_BUBBLE, [](bool b) -> void { pureSpaIO.setBubbleOn(b); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_FILTER, [](bool b) -> void { pureSpaIO.setFilterOn(b); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_HEATER, [](bool b) -> void { pureSpaIO.setHeaterOn(b); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_POWER,  [](bool b) -> void { pureSpaIO.setPowerOn(b); });
+        mqttClient.addSubscriber(MQTT_TOPIC::CMD_WATER,  [](int i) -> void { pureSpaIO.setDesiredWaterTempCelsius(i); });
+        if (pureSpaIO.getModel() == PureSpaIO::MODEL::SJBHS)
+        {
+          mqttClient.addSubscriber(MQTT_TOPIC::CMD_DISINFECTION, [](int i) -> void { pureSpaIO.setDisinfectionTime(i); });
+          mqttClient.addSubscriber(MQTT_TOPIC::CMD_JET,          [](bool b) -> void { pureSpaIO.setJetOn(b); });
+        }
+
+        // enable OTA update if URL is defined in config
+        if (config.exists(CONFIG_TAG::WIFI_OTA_URL))
+        {
+          mqttClient.addSubscriber(MQTT_TOPIC::CMD_OTA,  [](bool b) -> void { if (b) otaUpdate.start(config.get(CONFIG_TAG::WIFI_OTA_URL), mqttClient); });
+        }
+
+        // set language of error message if defined in config
+        if (config.exists(CONFIG_TAG::MQTT_ERROR_LANG))
+        {
+          String lang = config.get(CONFIG_TAG::MQTT_ERROR_LANG);
+          language = lang == "EN"? LANG::EN : (lang == "DE"? LANG::DE : LANG::CODE);
+        }
+
+        // init MQTT client
+        if (config.exists(CONFIG_TAG::MQTT_USER))
+        {
+          username = config.get(CONFIG_TAG::MQTT_USER);
+          password = config.get(CONFIG_TAG::MQTT_PASSWORD);
+        }
+        uint16 mqttPort;
+        if (config.exists(CONFIG_TAG::MQTT_PORT))
+        {
+          mqttPort = atoi(config.get(CONFIG_TAG::MQTT_PORT));
+        }
+        else
+        {
+          mqttPort = 1883;
+        }
+        mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), mqttPort, username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
+
+        // init NTC thermometer
+        thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
+
+        // enable hardware watchdog (8.3 s) by disabling software watchdog
+        ESP.wdtDisable();
+
+        ready = true;
+      }
+      catch (const std::runtime_error& re)
       {
-        mqttClient.addSubscriber(MQTT_TOPIC::CMD_OTA,  [](bool b) -> void { if (b) otaUpdate.start(config.get(CONFIG_TAG::WIFI_OTA_URL), mqttClient); });
+        Serial.println(re.what());
       }
-
-      // set language of error message if defined in config
-      if (config.exists(CONFIG_TAG::MQTT_ERROR_LANG))
-      {
-        String lang = config.get(CONFIG_TAG::MQTT_ERROR_LANG);
-        language = lang == "EN"? LANG::EN : (lang == "DE"? LANG::DE : LANG::CODE);
-      }
-
-      // init MQTT client
-      if (config.exists(CONFIG_TAG::MQTT_USER))
-      {
-        username = config.get(CONFIG_TAG::MQTT_USER);
-        password = config.get(CONFIG_TAG::MQTT_PASSWORD);
-      }
-      uint16 mqttPort;
-      if (config.exists(CONFIG_TAG::MQTT_PORT))
-      {
-        mqttPort = atoi(config.get(CONFIG_TAG::MQTT_PORT));
-      }
-      else
-      {
-        mqttPort = 1883;
-      }
-      mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), mqttPort, username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
-
-      // init NTC thermometer
-      thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
-
-      // enable hardware watchdog (8.3 s) by disabling software watchdog
-      ESP.wdtDisable();
-
-      ready = true;
     }
-    catch (const std::runtime_error& re)
-    {
-      Serial.println(re.what());
+    else {
+      return;
     }
   }
 
@@ -172,11 +193,21 @@ void loop()
 {
   // keep hardware watchdog alive
   ESP.wdtFeed();
-
-  wl_status_t wifiStatus = WiFi.status(); //  WL_IDLE_STATUS 0, WL_NO_SSID_AVAIL 1, WL_SCAN_COMPLETED 2, WL_CONNECTED 3, WL_CONNECT_FAILED 4, WL_CONNECTION_LOST 5, WL_DISCONNECTED 6, WL_NO_SHIELD 255
   unsigned long now = millis();
-  if (wifiStatus == WL_CONNECTED)
-  {
+
+#ifdef WIFI_MANAGER
+  ledBuiltin.loop();
+
+  if (wifiManager.isAP()) {
+    wifiManager.loop();
+    // force idle
+    delay(100);
+  }
+  else if (wifiManager.isSTAConnected()) {
+#else
+  wl_status_t wifiStatus = WiFi.status(); //  WL_IDLE_STATUS 0, WL_NO_SSID_AVAIL 1, WL_SCAN_COMPLETED 2, WL_CONNECTED 3, WL_CONNECT_FAILED 4, WL_CONNECTION_LOST 5, WL_DISCONNECTED 6, WL_NO_SHIELD 255
+  if (wifiStatus == WL_CONNECTED) {
+#endif
     // WiFi is connected
     disconnectTime = 0;
 
@@ -191,6 +222,17 @@ void loop()
     }
     else
     {
+#ifdef WIFI_MANAGER
+      if (pureSpaIO.isSetupModeTriggered())
+      {
+        Serial.println("Setup Mode Triggered");
+        config.set(CONFIG_TAG::WIFI_MODE, "SETUP");
+        config.save(CONFIG_TAG::FILENAME);
+        ESP.restart();
+        return;
+      }
+#endif
+
       // update MQTT
       mqttClient.loop();
       mqttPublisher.loop();

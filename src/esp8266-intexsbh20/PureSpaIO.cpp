@@ -397,6 +397,14 @@ uint8 PureSpaIO::isJetOn() const
 #endif
 }
 
+#ifdef WIFI_MANAGER
+boolean PureSpaIO::isSetupModeTriggered() const
+{
+  return (state.counterTempUnitChanged >= FRAME::UNITCHANGE_MIN) &&
+         (isPowerOn() == false);
+}
+#endif
+
 /**
  * set desired water temperature by performing button up or down actions
  * repeatedly depending on temperature delta
@@ -1037,6 +1045,25 @@ IRAM_ATTR inline void PureSpaIO::decodeDisplay()
                       state.waterTemp = isrState.displayValue;
                     }
 
+#ifdef WIFI_MANAGER
+                    // get temp unit
+                    uint16 tempUnit = display2LastDigit(isrState.displayValue);
+                    if (tempUnit != isrState.latestTempUnit)
+                    {
+                      if ((state.frameCounter - state.lastTempUnitChangeFrameCounter) <
+                           FRAME::UNITCHANGE_COUNTER_MAX)
+                      {
+                        state.counterTempUnitChanged++;
+                      }
+                      else
+                      {
+                        state.counterTempUnitChanged = 0;
+                      }
+
+                      state.lastTempUnitChangeFrameCounter = state.frameCounter;
+                      isrState.latestTempUnit = tempUnit;
+                    }
+#endif
                     isrState.stableWaterTempCount = CONFIRM_FRAMES::NOT_BLINKING;
                   }
                 }

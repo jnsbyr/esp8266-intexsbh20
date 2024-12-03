@@ -41,6 +41,10 @@ class MQTTClient
 {
 public:
   MQTTClient() : mqttClient(wifiClient) {}
+  MQTTClient(WiFiClient *client) : mqttClient(*client) {
+    wifiClient = *client;
+  }
+
 
 public:
   void addMetadata(const char* topic, const char* message);
@@ -48,6 +52,8 @@ public:
   void addSubscriber(const char* topic, void (*setter)(int value));
 
   void setup(const char* mqttServer, uint16 mqttPort, const char* mqttUsername, const char* mqttPassword,const char* clientId, const char* willTopic, const char* willMessage);
+  bool check_connect(const char* mqttServer, uint16 mqttPort, const char* mqttUsername, const char* mqttPassword, const char* cid, const char* wt, const char* wm);
+
   void loop();
 
   bool isConnected();
@@ -66,11 +72,11 @@ private:
 private:
   PubSubClient mqttClient;
   WiFiClient wifiClient;
-  const char* clientId;
-  const char* willTopic;
-  const char* willMessage;
-  const char* mqttuser;
-  const char* mqttpw;
+  const char* clientId = NULL;;
+  const char* willTopic = NULL;
+  const char* willMessage= NULL;
+  const char* mqttuser = NULL;
+  const char* mqttpw= NULL;
 
 private:
   std::map<String, String> metadata;
@@ -80,7 +86,7 @@ private:
   std::map<String, std::function<void (int)>> intSubscriber;
 
 private:
-  unsigned int now;
+  unsigned int now = 0;
   unsigned int lastConnectTime = 0;
 };
 
