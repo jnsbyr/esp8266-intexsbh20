@@ -40,13 +40,14 @@
 // select Intex PureSpa model by commenting in the desired variant
 //#define MODEL_SB_H20
 //#define MODEL_SJB_HS
+//#define MODEL_SSP
 
 // if changing the water temperature setpoint does not work reliably, commenting
 // in the following option may improve the behaviour at the cost of a short
 // disconnect to the MQTT server
 //#define FORCE_WIFI_SLEEP
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 /*****************************************************************************/
 
