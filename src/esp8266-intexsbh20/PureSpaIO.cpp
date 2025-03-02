@@ -89,6 +89,35 @@ namespace FRAME_BUTTON
   const uint16 HEATER       = 0x8000;
 }
 
+
+#elif defined MODEL_SSP
+
+const char MODEL_NAME[] = "Intex PureSpa SSP";
+
+// bit mask for LEDs
+namespace FRAME_LED
+{
+  const uint16 POWER          = 0x0001;
+  const uint16 BUBBLE         = 0x0400;  // max. 30 min
+  const uint16 HEATER_ON      = 0x0080;  // max. 72 h, will start filter, will not stop filter
+  const uint16 NO_BEEP        = 0x0100;
+  const uint16 HEATER_STANDBY = 0x0200;
+  const uint16 FILTER         = 0x1000;  // max. 24 h
+}
+
+// bit mask of button
+namespace FRAME_BUTTON
+{
+  const uint16 BUBBLE       = 0x0008;
+  const uint16 FILTER       = 0x0002;
+  const uint16 TEMP_DOWN    = 0x0080;
+  const uint16 POWER        = 0x0400;
+  const uint16 TEMP_UP      = 0x1000;
+  const uint16 TEMP_UNIT    = 0x2000;
+  const uint16 HEATER       = 0x8000;
+}
+
+
 #endif
 
 namespace FRAME_DIGIT
@@ -142,6 +171,9 @@ namespace FRAME_TYPE
   const uint16 BUTTON = CUE | FRAME_BUTTON::POWER | FRAME_BUTTON::FILTER | FRAME_BUTTON::HEATER | FRAME_BUTTON::BUBBLE | FRAME_BUTTON::TEMP_UP | FRAME_BUTTON::TEMP_DOWN | FRAME_BUTTON::TEMP_UNIT;
 #elif defined MODEL_SJB_HS
   const uint16 BUTTON = CUE | FRAME_BUTTON::POWER | FRAME_BUTTON::FILTER | FRAME_BUTTON::HEATER | FRAME_BUTTON::BUBBLE | FRAME_BUTTON::TEMP_UP | FRAME_BUTTON::TEMP_DOWN | FRAME_BUTTON::TEMP_UNIT | FRAME_BUTTON::DISINFECTION | FRAME_BUTTON::JET;
+#elif defined MODEL_SSP
+  const uint16 BUTTON = CUE | FRAME_BUTTON::POWER | FRAME_BUTTON::FILTER | FRAME_BUTTON::HEATER | FRAME_BUTTON::BUBBLE | FRAME_BUTTON::TEMP_UP | FRAME_BUTTON::TEMP_DOWN | FRAME_BUTTON::TEMP_UNIT;
+
 #endif
 }
 
