@@ -134,7 +134,8 @@ public:
   enum MODEL
   {
     SBH20 = 1,
-    SJBHS = 2
+    SJBHS = 2,
+    SSP = 3
   };
 
   class UNDEF
@@ -201,6 +202,8 @@ private:
     static const unsigned int BUTTON_FRAMES = 7; // number of button frames in each cycle
 #elif defined MODEL_SJB_HS
     static const unsigned int BUTTON_FRAMES = 9; // number of button frames in each cycle
+#elif defined MODEL_SSP
+    static const unsigned int BUTTON_FRAMES = 7; // number of button frames in each cycle
 #endif
     static const unsigned int TOTAL_FRAMES = 25 + BUTTON_FRAMES; // number of frames in each cycle
     static const unsigned int DISPLAY_FRAME_GROUPS =  5; // number of digit frame groups in each cycle
@@ -328,9 +331,11 @@ private:
   MODEL model = MODEL::SBH20;
 #elif defined MODEL_SJB_HS
   MODEL model = MODEL::SJBHS;
+#elif defined MODEL_SSP
+  MODEL model = MODEL::SSP;
 #else
   MODEL model;
-  #error no model (MODEL_SB_H20 or MODEL_SJB_HS) selected in common.h
+  #error no model (MODEL_SB_H20 or MODEL_SJB_HS or MODEL_SSP) selected in common.h
 #endif
 
 private:
