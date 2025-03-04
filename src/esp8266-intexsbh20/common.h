@@ -38,8 +38,13 @@
  *****************************************************************************/
 
 // select Intex PureSpa model by commenting in the desired variant
+// A) PureSpa SB-H20, PureSpa SSP-H-20-1 and SimpleSpa SB–B20
 //#define MODEL_SB_H20
+// B) PureSpa SJB-HS
 //#define MODEL_SJB_HS
+
+// define a custom model name to be reported via MQTT
+//#define CUSTOM_MODEL_NAME "Intex PureSpa"
 
 // if changing the water temperature setpoint does not work reliably, commenting
 // in the following option may improve the behaviour at the cost of a short
@@ -52,7 +57,7 @@
 
 namespace CONFIG
 {
-  const char WIFI_VERSION[] = "1.0.8.1"; // 22.08.2023
+  const char WIFI_VERSION[] = "1.0.8.2"; // 04.03.2025
 
   // WiFi parameters
   const unsigned long WIFI_MAX_DISCONNECT_DURATION = 900000; // [ms] 5 min until reboot

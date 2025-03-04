@@ -33,7 +33,7 @@
 
 #if defined MODEL_SB_H20
 
-const char MODEL_NAME[] = "Intex PureSpa SB-H20";
+#define DEFAULT_MODEL_NAME "Intex PureSpa SB-H20"
 
 // bit mask for LEDs
 namespace FRAME_LED
@@ -49,18 +49,18 @@ namespace FRAME_LED
 // bit mask of button
 namespace FRAME_BUTTON
 {
-  const uint16 POWER     = 0x0400;
   const uint16 FILTER    = 0x0002;
-  const uint16 HEATER    = 0x8000;
   const uint16 BUBBLE    = 0x0008;
-  const uint16 TEMP_UP   = 0x1000;
   const uint16 TEMP_DOWN = 0x0080;
+  const uint16 POWER     = 0x0400;
+  const uint16 TEMP_UP   = 0x1000;
   const uint16 TEMP_UNIT = 0x2000;
+  const uint16 HEATER    = 0x8000;
 }
 
 #elif defined MODEL_SJB_HS
 
-const char MODEL_NAME[] = "Intex PureSpa SJB-HS";
+#define DEFAULT_MODEL_NAME "Intex PureSpa SJB-HS"
 
 // bit mask for LEDs
 namespace FRAME_LED
@@ -90,6 +90,12 @@ namespace FRAME_BUTTON
 }
 
 #endif
+
+#ifdef CUSTOM_MODEL_NAME
+const char MODEL_NAME[] = CUSTOM_MODEL_NAME;
+#else
+const char MODEL_NAME[] = DEFAULT_MODEL_NAME;
+#endif  
 
 namespace FRAME_DIGIT
 {
