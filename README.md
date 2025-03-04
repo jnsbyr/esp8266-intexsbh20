@@ -18,15 +18,14 @@
 This projects was originally designed for the Intex PureSpa SB-H20 but it also
 supports other models:
 
- Model                  | Define [^1]  | Notes
- ---------------------- |:------------ |:---------------------------------------------------
- Intex PureSpa SB-H20   | MODEL_SB_H20 | supported
- Intex SimpleSpa SB–B20 | MODEL_SB_H20 | reported to be compatible, see [issue #5](../../issues/5)
- Intex PureSpa SJB-HS   | MODEL_SJB_HS | supported, see [issue #13](../../issues/13)
- Intex PureSpa SSP-H    | MODEL_SJB_HS | not tested [^2]
+ Model                    | Define [^1]  | Notes
+ ------------------------ |:------------ |:---------------------------------------------------
+ Intex PureSpa SB-H20     | MODEL_SB_H20 | supported
+ Intex SimpleSpa SB–B20   | MODEL_SB_H20 | reported to be compatible, see [issue #5](../../issues/5)
+ Intex PureSpa SSP-H-20-1 | MODEL_SB_H20 | supported, see [issue #53](../../issues/53)
+ Intex PureSpa SJB-HS     | MODEL_SJB_HS | supported, see [issue #13](../../issues/13)
 
 [^1]: #define required for build (see [common.h](src/esp8266-intexsbh20/common.h))
-[^2]: should be partially compatible, could be supported
 
 
 ## Introduction
