@@ -50,6 +50,7 @@
 
 #include "common.h"
 #include "ConfigurationFile.h"
+#include "HADiscovery.h"
 #include "MQTTClient.h"
 #include "MQTTPublisher.h"
 #include "NTCThermometer.h"
@@ -72,6 +73,7 @@ String mqttPort;
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
 bool initialized = false;
+bool discoveryPublished = false;
 
 
 /**
@@ -194,6 +196,13 @@ void loop()
       // update MQTT
       mqttClient.loop();
       mqttPublisher.loop();
+
+      // publish HA discovery configs once after first MQTT connect
+      if (!discoveryPublished && mqttClient.isConnected())
+      {
+        HADiscovery::publish(mqttClient.getClient(), pureSpaIO.getModelName());
+        discoveryPublished = true;
+      }
 
       // update pool
       pureSpaIO.loop();

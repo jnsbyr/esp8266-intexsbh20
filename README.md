@@ -351,6 +351,12 @@ If *wifi/state* is *error* you are only allowed to send the command
 *pool/command/power=off*. The PureSpa will continue to beep for a while. To
 clear the error it is necessary to power down the PureSpa.
 
+### Home Assistant
+
+If you are using [Home Assistant](https://www.home-assistant.io/) with the
+[MQTT integration](https://www.home-assistant.io/integrations/mqtt/) enabled,
+the firmware supports [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery).
+
 ### WiFi Controller Thermometer
 
 The circuit comes with a NTC sensor for measuring the temperature inside the

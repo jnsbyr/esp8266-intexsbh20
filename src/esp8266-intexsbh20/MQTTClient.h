@@ -52,6 +52,7 @@ public:
 
   bool isConnected();
   bool publish(const char* topic, const String& payload, bool retain=false, bool force=false);
+  PubSubClient& getClient() { return mqttClient; }
 
 private:
   static const unsigned int RECONNECT_DELAY = 3000; // [ms]
